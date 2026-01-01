@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="#222222">
+
+    <TextView
+        android:text="Secure Configuration"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:layout_marginBottom="24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:text="SOS Contact Number"
+        android:textColor="#AAAAAA"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <EditText
+        android:id="@+id/et_sos_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:inputType="phone"
+        android:hint="+1234567890"/>
+
+    <TextView
+        android:text="Target Packages (comma separated)"
+        android:textColor="#AAAAAA"
+        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <EditText
+        android:id="@+id/et_target_apps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:hint="org.telegram.messenger, com.whatsapp"/>
+
+    <TextView
+        android:text="SOS Message"
+        android:textColor="#AAAAAA"
+        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <EditText
+        android:id="@+id/et_sos_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:hint="Emergency Protocol Active."/>
+
+    <Button
+        android:id="@+id/btn_save_settings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SAVE ENCRYPTED"
+        android:layout_marginTop="32dp"
+        android:backgroundTint="#4CAF50"/>
+
+    <TextView
+        android:text="CUSTOMIZE TARGETS"
+        android:textColor="#4CAF50"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginTop="24dp"/>
+
+    <Button
+        android:id="@+id/btn_select_apps"
+        android:text="SELECT APPS TO UNINSTALL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#555555"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/btn_select_folders"
+        android:text="ADD CUSTOM FOLDER TARGETS"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#555555"
+        android:layout_marginTop="8dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#333333"
+        android:layout_marginVertical="24dp"/>
+
+    <Button
+        android:id="@+id/btn_open_help"
+        android:text="OPEN OPERATIONAL MANUAL"
+        android:backgroundTint="#607D8B"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btn_drill_mode"
+        android:text="ENTER DRILL MODE (SIMULATION)"
+        android:backgroundTint="#FF9800"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btn_diagnostics"
+        android:text="RUN SYSTEM DIAGNOSTICS"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#673AB7"
+        android:layout_marginTop="8dp"/>
+
+</LinearLayout>
