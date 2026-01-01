@@ -19,24 +19,9 @@ class GhostAccessibilityService : AccessibilityService() {
 
         // Safety Switch: Only automate if Panic Mode was activated by the user
         // This prevents the app from acting like malware during normal use.
-        // Assuming PrefsManager has a boolean check (you can implement logic to set this true in PanicDashboard)
-        // For this code, we proceed assuming the user wants automation if they are in the uninstall screen.
-
-        // Note: The prompt mentioned checking prefsManager.isPanicModeActive, but the user prompt
-        // code didn't strictly implement the check inside the logic block below in the final active version,
-        // but the comment says "Safety Switch". I will enforce it if possible, but the prompt's provided code
-        // is what I should follow. I'll stick to the prompt's provided code for Batch 4 (Active Automator).
-
-        // However, I see "Assuming PrefsManager has a boolean check". I added `isPanicModeActive` to PrefsManager in Step 2.
-        // I will use it to be safe and consistent with the comment.
-        // Wait, the prompt code says:
-        /*
-        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            val rootNode = rootInActiveWindow ?: return
-            // ...
+        if (!prefsManager.isPanicModeActive) {
+            return
         }
-        */
-        // I will stick to the provided code block logic.
 
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             val rootNode = rootInActiveWindow ?: return

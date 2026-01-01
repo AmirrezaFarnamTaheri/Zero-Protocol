@@ -117,7 +117,6 @@ class PanicDashboardActivity : AppCompatActivity() {
                 if (prefsManager.sosNumber.isNotEmpty()) {
                     sosBeacon.sendEmergencySignal(prefsManager.sosNumber, prefsManager.sosMessage)
                 }
-                // updateProgress(R.id.cb_sos, true) // Checkbox not in layout, omitting
             } catch (e: Exception) {
                 // Log error but continue
             }
@@ -129,7 +128,6 @@ class PanicDashboardActivity : AppCompatActivity() {
             DataIncinerator.executeTotalPurge(this@PanicDashboardActivity)
 
             withContext(Dispatchers.Main) {
-                // updateProgress(R.id.cb_wipe, true) // Checkbox not in layout, omitting
                 Toast.makeText(this@PanicDashboardActivity, "Incineration Complete", Toast.LENGTH_SHORT).show()
             }
         }
