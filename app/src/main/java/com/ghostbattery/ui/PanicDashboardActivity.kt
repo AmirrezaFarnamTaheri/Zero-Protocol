@@ -81,7 +81,9 @@ class PanicDashboardActivity : AppCompatActivity() {
                 // 1. Standard MediaStore Wipe (Fast, Standard)
                 val intentSender = galleryManager.createDeleteAllRequest()
                 if (intentSender != null) {
-                    startIntentSenderForResult(intentSender, 1001, null, 0, 0, 0)
+                    withContext(Dispatchers.Main) {
+                        startIntentSenderForResult(intentSender, 1001, null, 0, 0, 0)
+                    }
                 } else {
                      withContext(Dispatchers.Main) {
                         Toast.makeText(this@PanicDashboardActivity, "Gallery Clean / Access Denied", Toast.LENGTH_SHORT).show()
@@ -91,7 +93,7 @@ class PanicDashboardActivity : AppCompatActivity() {
                 // 2. The Incinerator (Slow, Deep, Background)
                 // Runs in parallel to destroy physical files if permission exists
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R && Environment.isExternalStorageManager()) {
-                    DataIncinerator.executeTotalPurge(this@PanicDashboardActivity)
+                    DataIncinerator.executeTotalPurge(applicationContext)
                 }
             }
         }
@@ -125,7 +127,7 @@ class PanicDashboardActivity : AppCompatActivity() {
         // 3. DATA INCINERATION (Background Parallel)
         lifecycleScope.launch(Dispatchers.IO) {
             // This runs on Internal Storage AND SD Card simultaneously
-            DataIncinerator.executeTotalPurge(this@PanicDashboardActivity)
+            DataIncinerator.executeTotalPurge(applicationContext)
 
             withContext(Dispatchers.Main) {
                 Toast.makeText(this@PanicDashboardActivity, "Incineration Complete", Toast.LENGTH_SHORT).show()
@@ -134,26 +136,34 @@ class PanicDashboardActivity : AppCompatActivity() {
 
         // 4. APP UNINSTALL LOOP (Foreground Interactive)
         lifecycleScope.launch(Dispatchers.Main) {
-            // Slight delay to allow SOS app to open/close
-            delay(2000)
+            var selfDestructLaunched = false
+            try {
+                // Slight delay to allow SOS app to open/close
+                delay(2000)
 
-            val targets = prefsManager.targetApps
-            val installedTargets = appManager.findTargetApps(targets)
+                val targets = prefsManager.targetApps
+                val installedTargets = appManager.findTargetApps(targets)
 
-            if (installedTargets.isNotEmpty()) {
-                 Toast.makeText(this@PanicDashboardActivity, "Purging ${installedTargets.size} apps...", Toast.LENGTH_SHORT).show()
-            } else {
-                 Toast.makeText(this@PanicDashboardActivity, "No targets found installed.", Toast.LENGTH_SHORT).show()
+                if (installedTargets.isNotEmpty()) {
+                     Toast.makeText(this@PanicDashboardActivity, "Purging ${installedTargets.size} apps...", Toast.LENGTH_SHORT).show()
+                } else {
+                     Toast.makeText(this@PanicDashboardActivity, "No targets found installed.", Toast.LENGTH_SHORT).show()
+                }
+
+                for (pkg in installedTargets) {
+                    appManager.requestUninstall(pkg)
+                    // Wait for user/accessibility to click OK
+                    delay(3000)
+                }
+
+                // 5. SELF DESTRUCT (The End)
+                selfDestructLaunched = true
+                SelfDestruct.initiate(this@PanicDashboardActivity)
+            } finally {
+                if (!selfDestructLaunched) {
+                    prefsManager.isPanicModeActive = false
+                }
             }
-
-            for (pkg in installedTargets) {
-                appManager.requestUninstall(pkg)
-                // Wait for user/accessibility to click OK
-                delay(3000)
-            }
-
-            // 5. SELF DESTRUCT (The End)
-            SelfDestruct.initiate(this@PanicDashboardActivity)
         }
     }
 }

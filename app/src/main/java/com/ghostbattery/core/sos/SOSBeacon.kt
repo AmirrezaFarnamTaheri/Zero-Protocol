@@ -46,16 +46,24 @@ class SOSBeacon(private val context: Context) {
     private fun openMessagingApp(phone: String, text: String) {
         // Targets WhatsApp explicitly, falls back to SMS if needed
         try {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phone&text=$text")
+            val uri = Uri.Builder()
+                .scheme("https")
+                .authority("api.whatsapp.com")
+                .path("send")
+                .appendQueryParameter("phone", phone)
+                .appendQueryParameter("text", text)
+                .build()
+
+            val intent = Intent(Intent.ACTION_VIEW, uri)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         } catch (e: Exception) {
             // Fallback to generic SMS
-            val smsIntent = Intent(Intent.ACTION_VIEW)
-            smsIntent.data = Uri.parse("sms:$phone")
-            smsIntent.putExtra("sms_body", text)
-            smsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            val smsIntent = Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse("sms:$phone")
+                putExtra("sms_body", text)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
             context.startActivity(smsIntent)
         }
     }

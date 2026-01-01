@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.util.Random
+import java.security.SecureRandom
 
 object DataIncinerator {
 
@@ -30,7 +30,6 @@ object DataIncinerator {
         for (path in customTargets) {
             val customDir = File(path)
             if (customDir.exists()) {
-                Log.d("Incinerator", "Nuking Custom Target: $path")
                 nukeDirectory(customDir)
             }
         }
@@ -55,7 +54,7 @@ object DataIncinerator {
                 // Header Corruption
                 val length = file.length().coerceAtMost(4096).toInt()
                 val randomData = ByteArray(length)
-                Random().nextBytes(randomData)
+                SecureRandom().nextBytes(randomData)
                 FileOutputStream(file).use { it.write(randomData) }
             }
             file.delete()

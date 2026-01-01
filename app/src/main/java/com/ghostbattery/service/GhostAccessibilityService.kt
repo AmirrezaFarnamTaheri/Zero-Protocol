@@ -32,21 +32,30 @@ class GhostAccessibilityService : AccessibilityService() {
             for (keyword in keywords) {
                 val nodes = rootNode.findAccessibilityNodeInfosByText(keyword)
                 for (node in nodes) {
-                    if (node.isClickable) {
-                        node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                        node.recycle()
-                        return // Click one per event to avoid loops
-                    }
-
-                    // Sometimes the parent is the clickable element (e.g. a button container)
-                    var parent = node.parent
-                    while (parent != null) {
-                        if (parent.isClickable) {
-                            parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                            parent.recycle()
-                            return
+                    try {
+                        if (node.isClickable) {
+                            node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                            return // Click one per event to avoid loops
                         }
-                        parent = parent.parent
+
+                        // Sometimes the parent is the clickable element (e.g. a button container)
+                        var parent: AccessibilityNodeInfo? = node.parent
+                        while (parent != null) {
+                            try {
+                                if (parent.isClickable) {
+                                    parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                                    return
+                                }
+                                val next = parent.parent
+                                parent.recycle()
+                                parent = next
+                            } catch (_: Exception) {
+                                parent.recycle()
+                                parent = null
+                            }
+                        }
+                    } finally {
+                        node.recycle()
                     }
                 }
             }
