@@ -84,7 +84,7 @@ class AppPickerActivity : AppCompatActivity() {
                 holder.checkbox.isChecked = app.isSelected
             }
             holder.checkbox.setOnClickListener {
-                app.isSelected = it.isChecked
+                app.isSelected = (it as CheckBox).isChecked
             }
         }
 

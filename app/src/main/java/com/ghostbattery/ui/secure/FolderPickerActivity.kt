@@ -73,7 +73,7 @@ class FolderPickerActivity : AppCompatActivity() {
         }
 
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val name: TextView = view.findViewById(R.id.tv_file_name)
+            val name: TextView = view.findViewById(android.R.id.text1)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
