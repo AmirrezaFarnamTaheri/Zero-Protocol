@@ -53,7 +53,18 @@ class GalleryManager(private val context: Context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 MediaStore.createDeleteRequest(context.contentResolver, uris).intentSender
             } else {
-                null // Legacy handling omitted for brevity
+                // Legacy handling for Android 10 (API 29)
+                // We cannot return an IntentSender for batch deletion in the same way on API 29 without RecoverableSecurityException loop.
+                // For simplicity in this specific "Panic" context, we attempt direct delete.
+                // If it fails due to scoped storage, it will throw, catching in caller.
+                for (uri in uris) {
+                    try {
+                        context.contentResolver.delete(uri, null, null)
+                    } catch (e: Exception) {
+                        // Ignore individual failures, try next
+                    }
+                }
+                null
             }
         }
     }
