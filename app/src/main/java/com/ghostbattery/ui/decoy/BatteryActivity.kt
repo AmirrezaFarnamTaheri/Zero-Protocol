@@ -1,6 +1,7 @@
 package com.ghostbattery.ui.decoy
 
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.BatteryManager
 import android.os.Bundle
 import android.view.View
@@ -43,8 +44,20 @@ class BatteryActivity : AppCompatActivity() {
         val batteryManager = getSystemService(BATTERY_SERVICE) as BatteryManager
         val batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         findViewById<TextView>(R.id.tv_battery_level).text = "$batteryLevel%"
-        findViewById<TextView>(R.id.tv_voltage).text = "4.2 V"
-        findViewById<TextView>(R.id.tv_status).text = "Healthy"
+
+        val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        val batteryStatus: Intent? = registerReceiver(null, filter)
+
+        val voltage = batteryStatus?.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1) ?: -1
+        if (voltage != -1) {
+            findViewById<TextView>(R.id.tv_voltage).text = "${voltage / 1000.0} V"
+        } else {
+            findViewById<TextView>(R.id.tv_voltage).text = "4.2 V" // Fallback
+        }
+
+        val status = batteryStatus?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
+        val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
+        findViewById<TextView>(R.id.tv_status).text = if(isCharging) "Charging" else "Healthy"
     }
 
     private fun setupSecretTrigger() {

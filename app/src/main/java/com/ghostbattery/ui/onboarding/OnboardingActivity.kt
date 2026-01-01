@@ -89,6 +89,20 @@ class OnboardingActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         // Update UI state based on permissions granted returning from Settings
-        findViewById<Button>(R.id.btn_grant_files).isEnabled = !if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Environment.isExternalStorageManager() else false
+        if (isSetupComplete()) {
+            startActivity(Intent(this, BatteryActivity::class.java))
+            finish()
+            return
+        }
+
+        val hasStorage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager()
+        } else {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+        }
+        findViewById<Button>(R.id.btn_grant_files).isEnabled = !hasStorage
+
+        val hasLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        findViewById<Button>(R.id.btn_grant_location).isEnabled = !hasLocation
     }
 }
