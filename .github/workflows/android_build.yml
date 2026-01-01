@@ -1,0 +1,43 @@
+name: Android Build CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Check out the repository
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 2. Set up JDK 17 (Required for modern Android Gradle Plugin)
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    # 3. Grant execute permission for gradlew
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    # 4. Build the Debug APK
+    # We use 'assembleDebug' because it doesn't require setting up signing keys yet.
+    # The resulting APK will be installable on your device.
+    - name: Build with Gradle
+      run: ./gradlew assembleDebug --stacktrace
+
+    # 5. Upload the APK as an artifact
+    # You can download this from the GitHub Actions tab after the build finishes.
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: GhostBattery-Debug
+        path: app/build/outputs/apk/debug/app-debug.apk
+        retention-days: 5

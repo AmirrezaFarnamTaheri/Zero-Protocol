@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.ghostbattery">
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
+    <application
+        android:name=".App"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.GhostBattery">
+
+        <!-- DECOY LAUNCHER -->
+        <activity
+            android:name=".ui.decoy.BatteryActivity"
+            android:exported="true"
+            android:theme="@style/Theme.GhostBattery.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- SECURE ACTIVITIES -->
+        <activity
+            android:name=".ui.PanicDashboardActivity"
+            android:exported="true"
+            android:theme="@style/Theme.GhostBattery.NoActionBar" />
+
+        <activity android:name=".ui.onboarding.OnboardingActivity"
+            android:theme="@style/Theme.GhostBattery.NoActionBar"/>
+
+        <activity android:name=".ui.secure.SettingsActivity"
+            android:theme="@style/Theme.GhostBattery.NoActionBar"/>
+
+        <activity android:name=".ui.secure.DiagnosticsActivity"
+                  android:theme="@style/Theme.GhostBattery.NoActionBar"/>
+        <activity android:name=".ui.secure.DrillModeActivity"
+                  android:theme="@style/Theme.GhostBattery.NoActionBar"/>
+        <activity android:name=".ui.secure.AppPickerActivity"
+                  android:theme="@style/Theme.GhostBattery.NoActionBar"/>
+        <activity android:name=".ui.secure.FolderPickerActivity"
+                  android:theme="@style/Theme.GhostBattery.NoActionBar"/>
+        <activity android:name=".ui.help.HelpActivity"
+                  android:theme="@style/Theme.GhostBattery.NoActionBar"/>
+
+        <!-- ACCESSIBILITY SERVICE -->
+        <service
+            android:name=".service.GhostAccessibilityService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_config" />
+        </service>
+
+    </application>
+</manifest>

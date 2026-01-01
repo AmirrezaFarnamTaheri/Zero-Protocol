@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">System Battery Health</string>
+
+    <string name="dashboard_title">PROTOCOL ZERO</string>
+    <string name="sos_label">SEND SOS BEACON</string>
+    <string name="wipe_label">CLEAN MEDIA</string>
+    <string name="uninstall_label">PURGE APPS</string>
+</resources>

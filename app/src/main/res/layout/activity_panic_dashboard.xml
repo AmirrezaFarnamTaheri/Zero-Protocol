@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PROTOCOL ZERO"
+        android:textColor="#FF0000"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+        android:id="@+id/btn_settings"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:text="⚙"
+        android:textSize="20sp"
+        android:background="@android:color/transparent"
+        android:textColor="#888888"
+        app:layout_constraintTop_toTopOf="@id/tv_title"
+        app:layout_constraintBottom_toBottomOf="@id/tv_title"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/btn_sos"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:text="1. SEND SOS\n(LOCATION)"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:backgroundTint="#2196F3"
+        android:layout_marginTop="48dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/btn_wipe_gallery"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:text="2. WIPE MEDIA\n(GALLERY)"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:backgroundTint="#FF9800"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/btn_sos"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/btn_uninstall_apps"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:text="3. PURGE APPS\n(TELEGRAM/WHATSAPP)"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:backgroundTint="#D32F2F"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/btn_wipe_gallery"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/tv_warning_banner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFF00"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/tv_footer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:id="@+id/tv_footer"
+        android:text="FINAL STEP: HOLD POWER + VOL DOWN FOR LOCKDOWN"
+        android:textColor="#666666"
+        android:gravity="center"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
