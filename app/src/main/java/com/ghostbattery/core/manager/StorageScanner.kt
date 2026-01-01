@@ -38,8 +38,8 @@ object StorageScanner {
         val path = file.absolutePath
         if (path.contains("/storage/emulated/0")) return Environment.getExternalStorageDirectory()
 
-        // Typical SD card pattern: /storage/1234-ABCD/Android/...
-        // We split by "/" and grab the first 3 segments
+        // Typical SD card pattern: /storage/1234-ABCD/Android/data
+        // We split by "/" and grab the first 3 segments to isolate the volume root
         val parts = path.split("/")
         if (parts.size >= 3 && parts[1] == "storage") {
             return File("/${parts[1]}/${parts[2]}")

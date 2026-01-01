@@ -44,7 +44,7 @@
             android:id="@+id/tv_help_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:text="Detailed content goes here..."
+            tools:text="Help content details will appear here."
             android:textColor="#CCCCCC"
             android:textSize="14sp"
             android:layout_marginTop="12dp"
