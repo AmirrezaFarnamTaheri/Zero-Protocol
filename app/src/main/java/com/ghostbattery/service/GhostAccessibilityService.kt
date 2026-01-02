@@ -62,14 +62,7 @@ class GhostAccessibilityService : AccessibilityService() {
                 val appName = getString(R.string.app_name)
                 if (rootNode.findAccessibilityNodeInfosByText(appName).isNotEmpty()) {
                     // Aggressively look for ANY clickable button if we see our app name
-                    val allButtons = rootNode.findAccessibilityNodeInfosByClassName("android.widget.Button")
-                    for (btn in allButtons) {
-                         if (performClick(btn)) {
-                             btn.recycle()
-                             return
-                         }
-                         btn.recycle()
-                    }
+                    clickAnyButton(rootNode)
                 }
 
             } catch (e: Exception) {
@@ -91,6 +84,23 @@ class GhostAccessibilityService : AccessibilityService() {
             val res = performClick(parent)
             parent.recycle()
             return res
+        }
+        return false
+    }
+
+    private fun clickAnyButton(node: AccessibilityNodeInfo): Boolean {
+        if (node.className == "android.widget.Button" && node.isClickable && node.isEnabled) {
+             return node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+        }
+        for (i in 0 until node.childCount) {
+            val child = node.getChild(i)
+            if (child != null) {
+                if (clickAnyButton(child)) {
+                    child.recycle()
+                    return true
+                }
+                child.recycle()
+            }
         }
         return false
     }
