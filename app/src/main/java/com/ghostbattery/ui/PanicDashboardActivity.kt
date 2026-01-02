@@ -95,11 +95,18 @@ class PanicDashboardActivity : AppCompatActivity() {
 
     private fun launchWipe() {
         lifecycleScope.launch(Dispatchers.IO) {
-            val hasFullAccess = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-                Environment.isExternalStorageManager() else false
+            val hasFullAccess = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                Environment.isExternalStorageManager()
+            } else {
+                // Check for legacy storage permission on older Android versions
+                androidx.core.content.ContextCompat.checkSelfPermission(
+                    this@PanicDashboardActivity,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            }
 
             if (hasFullAccess) {
-                // OPTIMIZATION: If we have full root access, skip the slow GalleryManager
+                // OPTIMIZATION: If we have full file access, skip the slow GalleryManager
                 // and go straight to the Incinerator. It's faster and silent.
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@PanicDashboardActivity, "Incinerating Background...", Toast.LENGTH_SHORT).show()
@@ -109,11 +116,12 @@ class PanicDashboardActivity : AppCompatActivity() {
                 // Fallback: Use the slow system dialog method
                 val intentSenders = galleryManager.createDeleteAllRequest()
                 withContext(Dispatchers.Main) {
-                    if (!intentSenders.isNullOrEmpty()) {
-                        // Process the first batch, user must click Allow
+                    intentSenders?.forEachIndexed { index, sender ->
                          try {
-                            startIntentSenderForResult(intentSenders[0], 1001, null, 0, 0, 0)
-                        } catch (e: Exception) {}
+                            startIntentSenderForResult(sender, 1001 + index, null, 0, 0, 0)
+                        } catch (_: Exception) {
+                            // continue to next
+                        }
                     }
                 }
             }

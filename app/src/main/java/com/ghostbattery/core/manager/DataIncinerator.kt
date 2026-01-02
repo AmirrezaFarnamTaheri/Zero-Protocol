@@ -42,16 +42,16 @@ object DataIncinerator {
     private fun nukeDirectory(dir: File) {
         if (!dir.exists()) return
 
-        try {
-            dir.walkBottomUp().forEach { file ->
+        dir.walkBottomUp().forEach { file ->
+            try {
                 if (file.isFile) {
                     incinerate(file)
                 } else if (file.isDirectory) {
                     file.delete()
                 }
+            } catch (_: Exception) {
+                // skip this file/directory
             }
-        } catch (e: Exception) {
-            // Directory iteration failed (e.g., permission lost), skip
         }
     }
 

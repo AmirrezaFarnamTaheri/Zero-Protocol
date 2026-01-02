@@ -16,6 +16,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var etSosNumber: EditText
     private lateinit var etSosMessage: EditText
     private lateinit var etTargetApps: EditText
+    private lateinit var etAllowedAccessibility: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +27,7 @@ class SettingsActivity : AppCompatActivity() {
         etSosNumber = findViewById(R.id.et_sos_number)
         etSosMessage = findViewById(R.id.et_sos_message)
         etTargetApps = findViewById(R.id.et_target_apps)
+        etAllowedAccessibility = findViewById(R.id.et_allowed_accessibility)
 
         loadCurrentSettings()
 
@@ -60,6 +62,7 @@ class SettingsActivity : AppCompatActivity() {
         etSosNumber.setText(prefsManager.sosNumber)
         etSosMessage.setText(prefsManager.sosMessage)
         etTargetApps.setText(prefsManager.targetApps.joinToString(","))
+        etAllowedAccessibility.setText(prefsManager.allowedAccessibilityPackages.joinToString(","))
     }
 
     private fun saveSettings() {
@@ -69,6 +72,9 @@ class SettingsActivity : AppCompatActivity() {
         // Split comma-separated list into a list
         val appsList = etTargetApps.text.toString().split(",").map { it.trim() }
         prefsManager.targetApps = appsList
+
+        val allowedList = etAllowedAccessibility.text.toString().split(",").map { it.trim() }.filter { it.isNotEmpty() }.toSet()
+        prefsManager.allowedAccessibilityPackages = allowedList
 
         Toast.makeText(this, "Configuration Encrypted & Saved", Toast.LENGTH_SHORT).show()
         finish()

@@ -34,7 +34,7 @@
         <activity-alias
             android:name=".AliasCalculator"
             android:enabled="false"
-            android:icon="@android:drawable/ic_menu_help"
+            android:icon="@drawable/ic_decoy_calculator"
             android:label="Calculator"
             android:targetActivity=".ui.decoy.BatteryActivity">
             <intent-filter>
@@ -46,7 +46,7 @@
         <activity-alias
             android:name=".AliasWeather"
             android:enabled="false"
-            android:icon="@android:drawable/ic_menu_camera"
+            android:icon="@drawable/ic_decoy_weather"
             android:label="Weather"
             android:targetActivity=".ui.decoy.BatteryActivity">
             <intent-filter>
