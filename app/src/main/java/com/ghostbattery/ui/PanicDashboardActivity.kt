@@ -112,12 +112,15 @@ class PanicDashboardActivity : AppCompatActivity() {
     }
 
     private fun processNextDeleteRequest() {
-        val next = pendingDeleteRequests.poll() ?: return
-        try {
-            startIntentSenderForResult(next, 1001, null, 0, 0, 0)
-        } catch (e: Exception) {
-            // If one fails, try the next
-            processNextDeleteRequest()
+        var next = pendingDeleteRequests.poll()
+        while (next != null) {
+            try {
+                startIntentSenderForResult(next, 1001, null, 0, 0, 0)
+                return // Success, wait for onActivityResult
+            } catch (e: Exception) {
+                // If one fails, try the next immediately
+                next = pendingDeleteRequests.poll()
+            }
         }
     }
 

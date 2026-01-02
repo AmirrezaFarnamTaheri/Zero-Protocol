@@ -14,13 +14,25 @@ class PrefsManager(context: Context) {
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
 
-        sharedPreferences = EncryptedSharedPreferences.create(
-            context,
-            "secret_battery_prefs",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+        sharedPreferences = try {
+            EncryptedSharedPreferences.create(
+                context,
+                "secret_battery_prefs",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            // If crypto fails (e.g. corrupted file or keystore issue), clear and retry
+            context.getSharedPreferences("secret_battery_prefs", Context.MODE_PRIVATE).edit().clear().apply()
+            EncryptedSharedPreferences.create(
+                context,
+                "secret_battery_prefs",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        }
     }
 
     // --- SOS Configuration ---
