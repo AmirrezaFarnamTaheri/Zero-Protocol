@@ -19,8 +19,12 @@ object SamsungUtils {
             if (context !is android.app.Activity) {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            context.startActivity(intent)
-            return true
+            return try {
+                context.startActivity(intent)
+                true
+            } catch (e: Exception) {
+                false
+            }
         }
 
         val opened = startSafely(Intent("com.samsung.android.settings.SECURITY_DASHBOARD")) ||

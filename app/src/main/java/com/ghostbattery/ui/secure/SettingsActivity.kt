@@ -62,10 +62,12 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         if (SamsungUtils.isSamsungDevice()) {
-            val btnSamsung = findViewById<Button>(R.id.btn_samsung_lockdown)
-            btnSamsung.visibility = android.view.View.VISIBLE
-            btnSamsung.setOnClickListener {
-                SamsungUtils.openLockdownSettings(this)
+            val btnSamsung = findViewById<Button?>(R.id.btn_samsung_lockdown)
+            if (btnSamsung != null) {
+                btnSamsung.visibility = android.view.View.VISIBLE
+                btnSamsung.setOnClickListener {
+                    SamsungUtils.openLockdownSettings(this)
+                }
             }
         }
     }
