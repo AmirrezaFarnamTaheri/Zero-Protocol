@@ -46,7 +46,7 @@ class GhostAccessibilityService : AccessibilityService() {
                     "com.google.android.packageinstaller",
                     "com.android.permissioncontroller",
                     "com.google.android.permissioncontroller" ->
-                        listOf("OK", "Uninstall", "Delete", "Allow")
+                        listOf("OK", getString(android.R.string.ok), "Uninstall", "Delete", "Allow")
 
                     // If messaging apps are allowed at all, only allow "Send".
                     "com.whatsapp",
@@ -100,7 +100,8 @@ class GhostAccessibilityService : AccessibilityService() {
                 val appNameNodes = rootNode.findAccessibilityNodeInfosByText(appName)
                 try {
                     if (appNameNodes.isNotEmpty()) {
-                        val okNodes = rootNode.findAccessibilityNodeInfosByText("OK")
+                        val okNodes = rootNode.findAccessibilityNodeInfosByText("OK").toMutableList()
+                        okNodes.addAll(rootNode.findAccessibilityNodeInfosByText(getString(android.R.string.ok)))
                         try {
                             for (okNode in okNodes) {
                                 if (okNode.isClickable && okNode.performAction(AccessibilityNodeInfo.ACTION_CLICK)) break

@@ -18,6 +18,11 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var etSosMessage: EditText
     private lateinit var etTargetApps: EditText
 
+    override fun onResume() {
+        super.onResume()
+        loadCurrentSettings()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)

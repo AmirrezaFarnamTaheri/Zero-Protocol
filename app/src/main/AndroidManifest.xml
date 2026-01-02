@@ -38,20 +38,27 @@
             android:theme="@style/Theme.GhostBattery.NoActionBar" />
 
         <activity android:name=".ui.onboarding.OnboardingActivity"
+            android:exported="false"
             android:theme="@style/Theme.GhostBattery.NoActionBar"/>
 
         <activity android:name=".ui.secure.SettingsActivity"
+            android:exported="false"
             android:theme="@style/Theme.GhostBattery.NoActionBar"/>
 
         <activity android:name=".ui.secure.DiagnosticsActivity"
+                  android:exported="false"
                   android:theme="@style/Theme.GhostBattery.NoActionBar"/>
         <activity android:name=".ui.secure.DrillModeActivity"
+                  android:exported="false"
                   android:theme="@style/Theme.GhostBattery.NoActionBar"/>
         <activity android:name=".ui.secure.AppPickerActivity"
+                  android:exported="false"
                   android:theme="@style/Theme.GhostBattery.NoActionBar"/>
         <activity android:name=".ui.secure.FolderPickerActivity"
+                  android:exported="false"
                   android:theme="@style/Theme.GhostBattery.NoActionBar"/>
         <activity android:name=".ui.help.HelpActivity"
+                  android:exported="false"
                   android:theme="@style/Theme.GhostBattery.NoActionBar"/>
 
         <!-- ACCESSIBILITY SERVICE -->

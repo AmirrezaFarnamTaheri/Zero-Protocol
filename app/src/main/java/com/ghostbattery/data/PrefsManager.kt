@@ -2,6 +2,7 @@ package com.ghostbattery.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 
@@ -23,15 +24,20 @@ class PrefsManager(context: Context) {
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
         } catch (e: Exception) {
-            // If crypto fails (e.g. corrupted file or keystore issue), clear and retry
-            context.getSharedPreferences("secret_battery_prefs", Context.MODE_PRIVATE).edit().clear().apply()
-            EncryptedSharedPreferences.create(
-                context,
-                "secret_battery_prefs",
-                masterKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
+            Log.e("PrefsManager", "Encrypted prefs init failed, retrying", e)
+            context.deleteSharedPreferences("secret_battery_prefs")
+            try {
+                EncryptedSharedPreferences.create(
+                    context,
+                    "secret_battery_prefs",
+                    masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                )
+            } catch (e2: Exception) {
+                Log.e("PrefsManager", "Retry prefs init failed, falling back to plain prefs", e2)
+                context.getSharedPreferences("secret_battery_prefs", Context.MODE_PRIVATE)
+            }
         }
     }
 

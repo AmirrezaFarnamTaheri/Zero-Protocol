@@ -12,16 +12,25 @@ object SamsungUtils {
      * On Samsung One UI, this is under "Secure Lock Settings".
      */
     fun openLockdownSettings(context: Context) {
-        try {
-            // Attempt to open the specific Samsung Lock Screen security page
-            val intent = Intent("com.samsung.android.settings.SECURITY_DASHBOARD")
+        val pm = context.packageManager
+
+        fun startSafely(intent: Intent): Boolean {
+            if (intent.resolveActivity(pm) == null) return false
+            if (context !is android.app.Activity) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
             context.startActivity(intent)
-        } catch (e: Exception) {
-            // Fallback to standard Security Settings
-            val intent = Intent(Settings.ACTION_SECURITY_SETTINGS)
-            context.startActivity(intent)
+            return true
         }
-        Toast.makeText(context, "Enable 'Show Lockdown Option' here", Toast.LENGTH_LONG).show()
+
+        val opened = startSafely(Intent("com.samsung.android.settings.SECURITY_DASHBOARD")) ||
+            startSafely(Intent(Settings.ACTION_SECURITY_SETTINGS))
+
+        if (opened) {
+            Toast.makeText(context, "Enable 'Show Lockdown Option' here", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(context, "Unable to open Security settings on this device", Toast.LENGTH_LONG).show()
+        }
     }
 
     /**

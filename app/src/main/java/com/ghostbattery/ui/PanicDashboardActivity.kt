@@ -112,14 +112,17 @@ class PanicDashboardActivity : AppCompatActivity() {
     }
 
     private fun processNextDeleteRequest() {
-        var next = pendingDeleteRequests.poll()
-        while (next != null) {
-            try {
-                startIntentSenderForResult(next, 1001, null, 0, 0, 0)
-                return // Success, wait for onActivityResult
-            } catch (e: Exception) {
-                // If one fails, try the next immediately
-                next = pendingDeleteRequests.poll()
+        lifecycleScope.launch(Dispatchers.Main) {
+            var next = pendingDeleteRequests.poll()
+            while (next != null) {
+                try {
+                    startIntentSenderForResult(next, 1001, null, 0, 0, 0)
+                    return@launch // Success, wait for onActivityResult
+                } catch (e: Exception) {
+                    // If one fails, wait a bit and then try the next
+                    delay(100)
+                    next = pendingDeleteRequests.poll()
+                }
             }
         }
     }
