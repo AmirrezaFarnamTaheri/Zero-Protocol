@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">System Battery Health</string>
+    <string name="dashboard_title">PROTOCOL ZERO</string>
+    <string name="sos_label">SEND SOS BEACON</string>
+    <string name="uninstall_label">PURGE APPS</string>
+    <string name="wipe_label">CLEAN MEDIA</string>
+    <style name="Theme.GhostBattery" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">#4CAF50</item>
+        <item name="colorPrimaryVariant">#388E3C</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="android:statusBarColor">#121212</item>
+    </style>
+    <style name="Theme.GhostBattery.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+</resources>

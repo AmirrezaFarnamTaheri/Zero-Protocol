@@ -1,0 +1,54 @@
+[
+    {
+        "merged": "com.ghostbattery.app-merged_res-4:/layout_activity_help.xml.flat",
+        "source": "com.ghostbattery.app-main-6:/layout/activity_help.xml"
+    },
+    {
+        "merged": "com.ghostbattery.app-merged_res-4:/layout_activity_diagnostics.xml.flat",
+        "source": "com.ghostbattery.app-main-6:/layout/activity_diagnostics.xml"
+    },
+    {
+        "merged": "com.ghostbattery.app-merged_res-4:/layout_activity_onboarding.xml.flat",
+        "source": "com.ghostbattery.app-main-6:/layout/activity_onboarding.xml"
+    },
+    {
+        "merged": "com.ghostbattery.app-merged_res-4:/layout_item_help_topic.xml.flat",
+        "source": "com.ghostbattery.app-main-6:/layout/item_help_topic.xml"
+    },
+    {
+        "merged": "com.ghostbattery.app-merged_res-4:/layout_item_app_picker.xml.flat",
+        "source": "com.ghostbattery.app-main-6:/layout/item_app_picker.xml"
+    },
+    {
+        "merged": "com.ghostbattery.app-merged_res-4:/drawable_ic_launcher.xml.flat",
+        "source": "com.ghostbattery.app-main-6:/drawable/ic_launcher.xml"
+    },
+    {
+        "merged": "com.ghostbattery.app-merged_res-4:/drawable_ic_launcher_round.xml.flat",
+        "source": "com.ghostbattery.app-main-6:/drawable/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.ghostbattery.app-merged_res-4:/layout_activity_settings.xml.flat",
+        "source": "com.ghostbattery.app-main-6:/layout/activity_settings.xml"
+    },
+    {
+        "merged": "com.ghostbattery.app-merged_res-4:/layout_activity_panic_dashboard.xml.flat",
+        "source": "com.ghostbattery.app-main-6:/layout/activity_panic_dashboard.xml"
+    },
+    {
+        "merged": "com.ghostbattery.app-merged_res-4:/layout_activity_folder_picker.xml.flat",
+        "source": "com.ghostbattery.app-main-6:/layout/activity_folder_picker.xml"
+    },
+    {
+        "merged": "com.ghostbattery.app-merged_res-4:/xml_accessibility_config.xml.flat",
+        "source": "com.ghostbattery.app-main-6:/xml/accessibility_config.xml"
+    },
+    {
+        "merged": "com.ghostbattery.app-merged_res-4:/layout_activity_battery.xml.flat",
+        "source": "com.ghostbattery.app-main-6:/layout/activity_battery.xml"
+    },
+    {
+        "merged": "com.ghostbattery.app-merged_res-4:/layout_activity_app_picker.xml.flat",
+        "source": "com.ghostbattery.app-main-6:/layout/activity_app_picker.xml"
+    }
+]
