@@ -4,63 +4,73 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="32dp"
-    android:background="#000000"
-    android:gravity="center">
+    android:gravity="center"
+    android:background="#000000">
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="SYSTEM SETUP"
         android:textColor="#FFFFFF"
-        android:textSize="28sp"
+        android:textSize="24sp"
         android:textStyle="bold"
-        android:layout_marginBottom="48dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_marginBottom="32dp"/>
 
     <TextView
-        android:text="1. Storage Access"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="To ensure protocol effectiveness, the following high-level permissions are mandatory."
         android:textColor="#AAAAAA"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-    <TextView
-        android:text="Required to clean gallery instantly."
-        android:textColor="#666666"
-        android:textSize="12sp"
-        android:layout_marginBottom="8dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:gravity="center"
+        android:layout_marginBottom="48dp"/>
+
     <Button
         android:id="@+id/btn_grant_files"
-        android:text="GRANT FILE ACCESS"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTint="#FF9800"
-        android:layout_marginBottom="24dp"/>
+        android:text="GRANT STORAGE ACCESS"
+        android:backgroundTint="#333333"
+        android:textColor="#FFFFFF"/>
 
     <TextView
-        android:text="2. Location Services"
-        android:textColor="#AAAAAA"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-    <TextView
-        android:text="Required for SOS Beacon coordinates."
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Required for Data Incineration"
         android:textColor="#666666"
         android:textSize="12sp"
-        android:layout_marginBottom="8dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_marginBottom="24dp"/>
+
     <Button
         android:id="@+id/btn_grant_location"
-        android:text="GRANT GPS ACCESS"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTint="#2196F3"
+        android:text="GRANT LOCATION ACCESS"
+        android:backgroundTint="#333333"
+        android:textColor="#FFFFFF"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Required for SOS Beacon"
+        android:textColor="#666666"
+        android:textSize="12sp"
         android:layout_marginBottom="48dp"/>
 
     <Button
         android:id="@+id/btn_finish_setup"
-        android:text="ENTER SYSTEM"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:backgroundTint="#4CAF50"/>
+        android:layout_height="wrap_content"
+        android:text="INITIALIZE SYSTEM"
+        android:backgroundTint="#FF0000"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status: PENDING CONFIGURATION"
+        android:textColor="#FFFF00"
+        android:layout_marginTop="24dp"/>
 
 </LinearLayout>
