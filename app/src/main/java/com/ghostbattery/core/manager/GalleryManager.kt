@@ -14,23 +14,29 @@ import kotlinx.coroutines.withContext
 class GalleryManager(private val context: Context) {
 
     /**
-     * Queries for all images/videos and returns an IntentSender to delete them.
-     * The Activity must start this intent to show the system dialog.
+     * Queries for all images/videos and returns a list of IntentSenders to delete them in chunks.
+     * The Activity must start these intents sequentially.
      */
-    suspend fun createDeleteAllRequest(): IntentSender? {
+    suspend fun createDeleteAllRequest(): List<IntentSender>? {
         return withContext(Dispatchers.IO) {
             val uris = mutableListOf<Uri>()
             val projection = arrayOf(MediaStore.MediaColumns._ID)
 
+        try {
             // 1. Query Images
             context.contentResolver.query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 projection, null, null, null
             )?.use { cursor ->
-                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
                 while (cursor.moveToNext()) {
                     val id = cursor.getLong(idColumn)
-                    uris.add(Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id.toString()))
+                    uris.add(
+                        Uri.withAppendedPath(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            id.toString()
+                        )
+                    )
                 }
             }
 
@@ -39,28 +45,52 @@ class GalleryManager(private val context: Context) {
                 MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                 projection, null, null, null
             )?.use { cursor ->
-                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
+                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
                 while (cursor.moveToNext()) {
                     val id = cursor.getLong(idColumn)
-                    uris.add(Uri.withAppendedPath(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id.toString()))
+                    uris.add(
+                        Uri.withAppendedPath(
+                            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                            id.toString()
+                        )
+                    )
                 }
             }
+        } catch (_: SecurityException) {
+            return@withContext null
+        }
 
             if (uris.isEmpty()) return@withContext null
 
-            // 3. Create Write Request (Android 11+)
-            // This is safer than raw file deletion and prevents Recycle Bin issues if confirmed properly
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                MediaStore.createDeleteRequest(context.contentResolver, uris).intentSender
+                // The underlying Binder transaction buffer has a limited size (typically 1MB).
+                // A very large list of Uris can cause a TransactionTooLargeException.
+                // Probe a safe batch size, then delete in chunks.
+                var batchSize = uris.size.coerceAtMost(10_000)
+                while (batchSize > 0) {
+                    try {
+                        MediaStore.createDeleteRequest(
+                            context.contentResolver,
+                            uris.take(batchSize)
+                        )
+                        break
+                    } catch (_: android.os.TransactionTooLargeException) {
+                        batchSize /= 2
+                    }
+                }
+                if (batchSize <= 0) return@withContext null
+
+                // IMPORTANT: caller must launch these sequentially to delete everything.
+                return@withContext uris
+                    .chunked(batchSize)
+                    .map { chunk ->
+                        MediaStore.createDeleteRequest(context.contentResolver, chunk).intentSender
+                    }
             } else {
-                // Legacy handling for Android 10 (API 29)
-                // We cannot return an IntentSender for batch deletion in the same way on API 29 without RecoverableSecurityException loop.
-                // For simplicity in this specific "Panic" context, we attempt direct delete.
-                // If it fails due to scoped storage, it will throw, catching in caller.
                 for (uri in uris) {
                     try {
                         context.contentResolver.delete(uri, null, null)
-                    } catch (e: Exception) {
+                } catch (_: Exception) {
                         // Ignore individual failures, try next
                     }
                 }

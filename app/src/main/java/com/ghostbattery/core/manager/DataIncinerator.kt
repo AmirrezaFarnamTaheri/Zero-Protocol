@@ -51,11 +51,16 @@ object DataIncinerator {
         if (!file.exists()) return
         try {
             if (file.canWrite()) {
-                // Header Corruption
-                val length = file.length().coerceAtMost(4096).toInt()
-                val randomData = ByteArray(length)
-                SecureRandom().nextBytes(randomData)
-                FileOutputStream(file).use { it.write(randomData) }
+                val overwriteLen = file.length().coerceAtMost(4096).toInt()
+                if (overwriteLen > 0) {
+                    val randomData = ByteArray(overwriteLen)
+                    SecureRandom().nextBytes(randomData)
+
+                    java.io.RandomAccessFile(file, "rws").use { raf ->
+                        raf.seek(0)
+                        raf.write(randomData)
+                    }
+                }
             }
             file.delete()
         } catch (e: Exception) {

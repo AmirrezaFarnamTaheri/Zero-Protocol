@@ -23,7 +23,16 @@ class OnboardingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_onboarding)
 
         findViewById<Button>(R.id.btn_grant_files).setOnClickListener {
-            requestAllFilesAccess()
+            // Avoid stacking Settings UI + runtime permission dialog in one click.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (!Environment.isExternalStorageManager()) {
+                    requestAllFilesAccess()
+                } else {
+                    requestMediaAccessIfNeeded()
+                }
+            } else {
+                requestAllFilesAccess()
+            }
         }
 
         findViewById<Button>(R.id.btn_grant_location).setOnClickListener {
@@ -63,6 +72,28 @@ class OnboardingActivity : AppCompatActivity() {
         }
     }
 
+    private fun requestMediaAccessIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val missing = mutableListOf<String>()
+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                missing += Manifest.permission.READ_MEDIA_IMAGES
+            }
+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                missing += Manifest.permission.READ_MEDIA_VIDEO
+            }
+
+            if (missing.isNotEmpty()) {
+                ActivityCompat.requestPermissions(this, missing.toTypedArray(), 103)
+            }
+        }
+    }
+
     private fun requestLocationAccess() {
         ActivityCompat.requestPermissions(
             this,
@@ -75,15 +106,27 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun isSetupComplete(): Boolean {
-        val hasLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        val hasLocation =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED
 
         val hasStorage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Environment.isExternalStorageManager()
         } else {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+                PackageManager.PERMISSION_GRANTED
         }
 
-        return hasLocation && hasStorage
+        val hasMedia = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) ==
+                PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+
+        return hasLocation && hasStorage && hasMedia
     }
 
     override fun onResume() {

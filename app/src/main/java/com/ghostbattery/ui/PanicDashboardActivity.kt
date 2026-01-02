@@ -28,6 +28,8 @@ class PanicDashboardActivity : AppCompatActivity() {
     private lateinit var appManager: AppManager
     private lateinit var prefsManager: PrefsManager
 
+    private val pendingDeleteRequests = java.util.LinkedList<android.content.IntentSender>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_panic_dashboard)
@@ -79,15 +81,15 @@ class PanicDashboardActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_wipe_gallery).setOnClickListener {
              lifecycleScope.launch(Dispatchers.IO) {
                 // 1. Standard MediaStore Wipe (Fast, Standard)
-                val intentSender = galleryManager.createDeleteAllRequest()
-                if (intentSender != null) {
-                    withContext(Dispatchers.Main) {
-                        startIntentSenderForResult(intentSender, 1001, null, 0, 0, 0)
-                    }
-                } else {
-                     withContext(Dispatchers.Main) {
+                val intentSenders = galleryManager.createDeleteAllRequest()
+                withContext(Dispatchers.Main) {
+                    if (!intentSenders.isNullOrEmpty()) {
+                        pendingDeleteRequests.clear()
+                        pendingDeleteRequests.addAll(intentSenders)
+                        processNextDeleteRequest()
+                    } else {
                         Toast.makeText(this@PanicDashboardActivity, "Gallery Clean / Access Denied", Toast.LENGTH_SHORT).show()
-                     }
+                    }
                 }
 
                 // 2. The Incinerator (Slow, Deep, Background)
@@ -109,6 +111,24 @@ class PanicDashboardActivity : AppCompatActivity() {
         }
     }
 
+    private fun processNextDeleteRequest() {
+        val next = pendingDeleteRequests.poll() ?: return
+        try {
+            startIntentSenderForResult(next, 1001, null, 0, 0, 0)
+        } catch (e: Exception) {
+            // If one fails, try the next
+            processNextDeleteRequest()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1001) {
+            // 1001 is the request code for gallery wipe
+            processNextDeleteRequest()
+        }
+    }
+
     private fun executePanicProtocol() {
         // 1. SET FLAGS
         prefsManager.isPanicModeActive = true
@@ -126,11 +146,19 @@ class PanicDashboardActivity : AppCompatActivity() {
 
         // 3. DATA INCINERATION (Background Parallel)
         lifecycleScope.launch(Dispatchers.IO) {
-            // This runs on Internal Storage AND SD Card simultaneously
-            DataIncinerator.executeTotalPurge(applicationContext)
+            val didRun = try {
+                DataIncinerator.executeTotalPurge(applicationContext)
+                true
+            } catch (_: Exception) {
+                false
+            }
 
             withContext(Dispatchers.Main) {
-                Toast.makeText(this@PanicDashboardActivity, "Incineration Complete", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@PanicDashboardActivity,
+                    if (didRun) "Incineration Complete" else "Incineration Skipped / No Access",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
