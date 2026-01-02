@@ -7,6 +7,10 @@ import android.widget.Toast
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.ghostbattery.R
 import com.ghostbattery.core.manager.AppManager
 import com.ghostbattery.core.manager.GalleryManager

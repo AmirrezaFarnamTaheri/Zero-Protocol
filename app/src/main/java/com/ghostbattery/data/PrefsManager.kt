@@ -11,13 +11,14 @@ class PrefsManager(context: Context) {
     private val sharedPreferences: SharedPreferences
 
     init {
-        val masterKey = MasterKey.Builder(context)
+        val appContext = context.applicationContext
+        val masterKey = MasterKey.Builder(appContext)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
 
         sharedPreferences = try {
             EncryptedSharedPreferences.create(
-                context,
+                appContext,
                 "secret_battery_prefs",
                 masterKey,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
@@ -26,13 +27,13 @@ class PrefsManager(context: Context) {
         } catch (e: Exception) {
             Log.e("PrefsManager", "Encrypted prefs init failed, retrying", e)
             // Clear both the prefs file and the crypto keysets used by EncryptedSharedPreferences
-            context.deleteSharedPreferences("secret_battery_prefs")
-            context.deleteSharedPreferences("__androidx_security_crypto_encrypted_prefs_key_keyset__")
-            context.deleteSharedPreferences("__androidx_security_crypto_encrypted_prefs_value_keyset__")
+            appContext.deleteSharedPreferences("secret_battery_prefs")
+            appContext.deleteSharedPreferences("__androidx_security_crypto_encrypted_prefs_key_keyset__")
+            appContext.deleteSharedPreferences("__androidx_security_crypto_encrypted_prefs_value_keyset__")
 
             try {
                 EncryptedSharedPreferences.create(
-                    context,
+                    appContext,
                     "secret_battery_prefs",
                     masterKey,
                     EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
@@ -40,7 +41,7 @@ class PrefsManager(context: Context) {
                 )
             } catch (e2: Exception) {
                 Log.e("PrefsManager", "Retry prefs init failed, falling back to plain prefs", e2)
-                context.getSharedPreferences("secret_battery_prefs_plain_fallback", Context.MODE_PRIVATE)
+                appContext.getSharedPreferences("secret_battery_prefs", Context.MODE_PRIVATE)
             }
         }
     }
