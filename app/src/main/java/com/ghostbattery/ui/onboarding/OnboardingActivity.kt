@@ -24,6 +24,7 @@ class OnboardingActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btn_grant_files).setOnClickListener {
             requestAllFilesAccess()
+            requestMediaAccessIfNeeded()
         }
 
         findViewById<Button>(R.id.btn_grant_location).setOnClickListener {
@@ -63,6 +64,16 @@ class OnboardingActivity : AppCompatActivity() {
         }
     }
 
+    private fun requestMediaAccessIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val perms = arrayOf(
+                Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.READ_MEDIA_VIDEO
+            )
+            ActivityCompat.requestPermissions(this, perms, 103)
+        }
+    }
+
     private fun requestLocationAccess() {
         ActivityCompat.requestPermissions(
             this,
@@ -75,15 +86,27 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun isSetupComplete(): Boolean {
-        val hasLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        val hasLocation =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED
 
         val hasStorage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Environment.isExternalStorageManager()
         } else {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+                PackageManager.PERMISSION_GRANTED
         }
 
-        return hasLocation && hasStorage
+        val hasMedia = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) ==
+                PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+
+        return hasLocation && hasStorage && hasMedia
     }
 
     override fun onResume() {

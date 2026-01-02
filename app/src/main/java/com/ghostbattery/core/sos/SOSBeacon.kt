@@ -35,32 +35,36 @@ class SOSBeacon(private val context: Context) {
         }
 
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-        // Uses the last known location to be instantaneous
-        return try {
+
+        val last = try {
             fusedLocationClient.lastLocation.await()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
+            null
+        }
+        if (last != null) return last
+
+        return try {
+            fusedLocationClient
+                .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                .await()
+        } catch (_: Exception) {
             null
         }
     }
 
     private fun openMessagingApp(phone: String, text: String) {
-        // Targets WhatsApp explicitly, falls back to SMS if needed
+        // Prefer direct WhatsApp send, fall back to SMS
         try {
-            val uri = Uri.Builder()
-                .scheme("https")
-                .authority("api.whatsapp.com")
-                .path("send")
-                .appendQueryParameter("phone", phone)
-                .appendQueryParameter("text", text)
-                .build()
-
-            val intent = Intent(Intent.ACTION_VIEW, uri)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
+            val waIntent = Intent(Intent.ACTION_SENDTO).apply {
+                data = Uri.parse("smsto:$phone")
+                putExtra(Intent.EXTRA_TEXT, text)
+                setPackage("com.whatsapp")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(waIntent)
         } catch (e: Exception) {
-            // Fallback to generic SMS
-            val smsIntent = Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse("sms:$phone")
+            val smsIntent = Intent(Intent.ACTION_SENDTO).apply {
+                data = Uri.parse("smsto:$phone")
                 putExtra("sms_body", text)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
