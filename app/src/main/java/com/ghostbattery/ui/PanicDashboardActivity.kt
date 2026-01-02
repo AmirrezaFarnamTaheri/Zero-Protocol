@@ -20,10 +20,6 @@ import com.ghostbattery.core.manager.SelfDestruct
 import com.ghostbattery.data.PrefsManager
 import com.ghostbattery.utils.PermissionHelper
 import android.os.Environment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class PanicDashboardActivity : AppCompatActivity() {
 
