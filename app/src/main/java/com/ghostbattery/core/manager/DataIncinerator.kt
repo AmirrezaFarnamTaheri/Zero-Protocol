@@ -6,37 +6,43 @@ import com.ghostbattery.utils.Constants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileOutputStream
+import java.io.RandomAccessFile
 import java.security.SecureRandom
 
 object DataIncinerator {
 
     suspend fun executeTotalPurge(context: Context) = withContext(Dispatchers.IO) {
-        val roots = StorageScanner.getAllStorageRoots(context)
-        val prefs = com.ghostbattery.data.PrefsManager(context)
+        try {
+            val roots = StorageScanner.getAllStorageRoots(context)
+            val prefs = com.ghostbattery.data.PrefsManager(context)
 
-        // 1. STANDARD TARGETS (On all storage roots)
-        for (root in roots) {
-            nukeDirectory(File(root, "DCIM"))
-            nukeDirectory(File(root, "Pictures"))
-            nukeDirectory(File(root, "WhatsApp/Media"))
-            nukeDirectory(File(root, "Android/media/com.whatsapp/WhatsApp/Media"))
-            nukeDirectory(File(root, "Download"))
-            nukeDirectory(File(root, "Android/data/com.sec.android.gallery3d/files/.trash"))
-        }
+            // 1. STANDARD TARGETS
+            val targetPaths = listOf(
+                "DCIM", "Pictures", "Download", "Documents",
+                "WhatsApp/Media", "Android/media/com.whatsapp/WhatsApp/Media",
+                "Android/data/com.sec.android.gallery3d/files/.trash"
+            )
 
-        // 2. CUSTOM USER TARGETS
-        val customTargets = prefs.customFolders
-        for (path in customTargets) {
-            val customDir = File(path)
-            if (customDir.exists()) {
-                nukeDirectory(customDir)
+            for (root in roots) {
+                for (path in targetPaths) {
+                    nukeDirectory(File(root, path))
+                }
             }
+
+            // 2. CUSTOM TARGETS
+            val customTargets = prefs.customFolders
+            for (path in customTargets) {
+                nukeDirectory(File(path))
+            }
+        } catch (e: Exception) {
+            Log.e("Incinerator", "Global purge error: ${e.message}")
         }
     }
 
     private fun nukeDirectory(dir: File) {
-        if (dir.exists() && dir.isDirectory) {
+        if (!dir.exists()) return
+
+        try {
             dir.walkBottomUp().forEach { file ->
                 if (file.isFile) {
                     incinerate(file)
@@ -44,27 +50,31 @@ object DataIncinerator {
                     file.delete()
                 }
             }
+        } catch (e: Exception) {
+            // Directory iteration failed (e.g., permission lost), skip
         }
     }
 
     private fun incinerate(file: File) {
-        if (!file.exists()) return
         try {
-            if (file.canWrite()) {
-                val overwriteLen = file.length().coerceAtMost(4096).toInt()
+            if (file.exists() && file.canWrite()) {
+                val length = file.length()
+                val overwriteLen = length.coerceAtMost(4096).toInt()
+
                 if (overwriteLen > 0) {
                     val randomData = ByteArray(overwriteLen)
                     SecureRandom().nextBytes(randomData)
 
-                    java.io.RandomAccessFile(file, "rws").use { raf ->
+                    RandomAccessFile(file, "rws").use { raf ->
                         raf.seek(0)
                         raf.write(randomData)
+                        raf.fd.sync() // Force write to disk
                     }
                 }
+                file.delete()
             }
-            file.delete()
         } catch (e: Exception) {
-            // Priority is deletion, ignore IO errors during corruption
+            // If corruption fails (e.g. file locked), try to delete anyway
             file.delete()
         }
     }

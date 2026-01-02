@@ -21,88 +21,79 @@ class HelpActivity : AppCompatActivity() {
     private fun getHelpTopics(): List<HelpItem> {
         return listOf(
             HelpItem(
-                "🛑 PHASE 0: CRITICAL PRE-REQUISITES",
+                "🚨 CRITICAL: READ FIRST",
                 """
-                Before relying on this app, you MUST configure Android settings:
+                Protocol Zero is a fail-safe panic system. It is designed to run when you are under duress.
 
-                1. SECURE FOLDER:
-                - Go to Quick Settings (Swipe Down) -> Add 'Secure Folder'.
-                - Move ALL sensitive apps (Telegram, Signal) inside it.
-                - This app protects the 'Decoy' side; Secure Folder protects the 'Real' side.
-
-                2. LOCKDOWN MODE:
-                - Settings -> Lock Screen -> Secure Lock Settings.
-                - Enable 'Show Lockdown Option'.
-                - Usage: Hold Power + Vol Down to instantly disable fingerprint unlocking.
+                DO NOT test the 'Execute Sequence' unless you are prepared to lose data. Use 'Drill Mode' in Settings for practice.
                 """.trimIndent()
             ),
             HelpItem(
-                "🔋 PHASE 1: CAMOUFLAGE MASTERY",
+                "👻 STEALTH MODE (CAMOUFLAGE)",
                 """
-                How to access the Dashboard without raising suspicion:
-
                 1. THE DISGUISE:
-                - The app looks like a Battery Saver.
-                - It shows real voltage/level data to pass inspection.
+                - The app masquerades as 'System Battery Health'.
+                - It displays real voltage and charging status to pass a casual inspection.
 
-                2. THE TRIGGER:
-                - Tap the text that says "VOLTAGE" (or "4200 mV") exactly 5 times.
-                - Do it quickly (within 2 seconds).
+                2. ACTIVATION:
+                - Tap the 'VOLTAGE' text (e.g., '4200 mV') exactly 5 times rapidly.
                 - This unlocks the Red 'Panic Dashboard'.
 
-                3. STEALTH TIP:
-                - Turn off Notifications for this app in Android Settings so no 'Permission Granted' alerts appear.
+                3. ICON SWITCHER:
+                - Go to Settings > Change Icon to disguise the app as a Calculator or Weather app.
                 """.trimIndent()
             ),
             HelpItem(
-                "⚙️ PHASE 2: AUTOMATION SETUP",
+                "⚡ THE PANIC PROTOCOL",
                 """
-                The app needs to click buttons for you.
+                When you initiate the sequence (or tap individual buttons), the following happens:
 
-                1. ACCESSIBILITY:
-                - When asked, enable 'System Battery Health' in Accessibility settings.
-                - If the toggle turns gray/off, reboot the phone.
+                1. SOS BEACON (Network):
+                - Sends a pre-defined WhatsApp message with your location to your trusted contact.
+                - Uses Accessibility to auto-click 'Send'.
 
-                2. FILE ACCESS:
-                - 'Manage All Files' is REQUIRED to bypass the Recycle Bin.
-                - Without this, photos are just moved to 'Trash', not deleted.
+                2. DATA INCINERATOR (Background):
+                - Overwrites file headers with random noise before deleting them.
+                - Targets: Gallery, Downloads, Documents, WhatsApp Media.
+
+                3. APP PURGE (Foreground):
+                - Uninstalls selected sensitive apps (e.g., Signal, Telegram).
+                - Uses Accessibility to auto-click 'Uninstall'/'OK'.
+
+                4. SELF DESTRUCT:
+                - The app uninstalls itself to remove evidence of the tool.
                 """.trimIndent()
             ),
             HelpItem(
-                "🏃 PHASE 3: THE CHASE (EXECUTION)",
+                "🛡️ SETUP REQUIREMENTS",
                 """
-                Use this when you have 2-5 minutes (e.g., being pulled over/stopped).
+                For the automation to work, you must grant:
 
-                1. OPEN APP -> TAP 5 TIMES.
-                2. TAP 'EXECUTE SEQUENCE'.
+                1. ACCESSIBILITY SERVICE:
+                - Required to click 'Uninstall' and 'Send' buttons for you.
 
-                WHAT HAPPENS NEXT?
-                - SOS: Sends location to your trusted contact via WhatsApp (Auto-clicks 'Send').
-                - INCINERATOR: Background process starts corrupting and deleting files.
-                - PURGE: Foreground loop launches Uninstalls.
-                - ACTION REQUIRED: Keep the screen ON. If a dialog appears, the app will try to click 'OK'. If it misses, TAP OK YOURSELF.
+                2. ALL FILES ACCESS:
+                - Required to permanently delete files without moving them to Trash.
+
+                3. DISPLAY OVER OTHER APPS:
+                - Required to keep the panic screen visible.
+                """.trimIndent()
+            ),
+             HelpItem(
+                "🧪 DRILL MODE",
+                """
+                Located in Settings.
+
+                - Simulates the entire panic sequence visually.
+                - DOES NOT delete files or uninstall apps.
+                - Use this to train your muscle memory.
                 """.trimIndent()
             ),
             HelpItem(
-                "🔥 PHASE 4: DATA INCINERATION",
+                "❓ TROUBLESHOOTING",
                 """
-                How deletion works in this app:
-
-                - STANDARD DELETE: Just removes the file pointer.
-                - INCINERATION (This App):
-                  1. Opens the file.
-                  2. Overwrites the header (first 4KB) with random noise.
-                  3. Deletes the file.
-                - RESULT: Even if recovered, the file is unreadable static.
-                - SCOPE: Internal Storage + SD Cards + WhatsApp Media + Samsung Trash.
-                """.trimIndent()
-            ),
-            HelpItem(
-                "⚠️ TROUBLESHOOTING",
-                """
-                - "App Crashes on Uninstall": This is normal if the target app is already gone.
-                - "SOS didn't send": Check if you have internet. If signal is cut, the message stays queued.
-                - "Decoy Trigger won't work": Ensure you are tapping the VOLTAGE text, not the icon.
+                - "Automation stops working": Android may kill the Accessibility Service. Go to Settings > Accessibility and toggle 'System Battery Health' OFF and ON.
+                - "Files in Trash": If you see deleted files in the Trash/Recycle Bin, it means 'All Files Access' was not granted. The app fell back to standard deletion.
                 """.trimIndent()
             )
         )

