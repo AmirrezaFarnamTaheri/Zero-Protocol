@@ -55,10 +55,15 @@ class SOSBeacon(private val context: Context) {
     private fun openMessagingApp(phone: String, text: String) {
         // Prefer direct WhatsApp send, fall back to SMS
         try {
-            val waIntent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("smsto:$phone")
-                putExtra(Intent.EXTRA_TEXT, text)
+            val waIntent = Intent(Intent.ACTION_SEND).apply {
+                // Use ACTION_SEND for sharing content.
+                type = "text/plain"
+                // Explicitly set the package to ensure it's sent via WhatsApp.
                 setPackage("com.whatsapp")
+                // The "jid" extra is used to specify the recipient's phone number in the format required by WhatsApp.
+                // The "@s.whatsapp.net" suffix is the standard for WhatsApp JIDs.
+                putExtra("jid", "$phone@s.whatsapp.net")
+                putExtra(Intent.EXTRA_TEXT, text)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(waIntent)

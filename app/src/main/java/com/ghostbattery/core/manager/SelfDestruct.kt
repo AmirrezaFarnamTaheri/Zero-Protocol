@@ -19,13 +19,16 @@ object SelfDestruct {
         context.startActivity(intent)
 
         // Fail-safe: if uninstall is canceled/blocked, disarm auto-clicker.
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+        val handler = android.os.Handler(android.os.Looper.getMainLooper())
+        val disarmRunnable = Runnable {
             try {
-                context.packageManager.getPackageInfo(context.packageName, 0)
+                val appCtx = context.applicationContext
+                appCtx.packageManager.getPackageInfo(appCtx.packageName, 0)
                 prefs.isPanicModeActive = false
             } catch (_: Exception) {
                 // App not installed anymore => no need to reset.
             }
-        }, 15_000)
+        }
+        handler.postDelayed(disarmRunnable, 15_000)
     }
 }

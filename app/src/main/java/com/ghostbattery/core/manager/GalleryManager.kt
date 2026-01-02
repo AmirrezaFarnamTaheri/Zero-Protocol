@@ -63,9 +63,11 @@ class GalleryManager(private val context: Context) {
             if (uris.isEmpty()) return@withContext null
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val batchSize = 500
-            val firstBatch = uris.take(batchSize)
-            MediaStore.createDeleteRequest(context.contentResolver, firstBatch).intentSender
+            // The underlying Binder transaction buffer has a limited size (typically 1MB).
+            // A very large list of Uris can cause a TransactionTooLargeException.
+            // We cap the deletion request at a large but safe number of items.
+            val batch = uris.take(10000)
+            MediaStore.createDeleteRequest(context.contentResolver, batch).intentSender
             } else {
                 for (uri in uris) {
                     try {
