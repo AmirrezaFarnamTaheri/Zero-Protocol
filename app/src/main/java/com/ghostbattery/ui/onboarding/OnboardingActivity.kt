@@ -23,8 +23,16 @@ class OnboardingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_onboarding)
 
         findViewById<Button>(R.id.btn_grant_files).setOnClickListener {
-            requestAllFilesAccess()
-            requestMediaAccessIfNeeded()
+            // Avoid stacking Settings UI + runtime permission dialog in one click.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (!Environment.isExternalStorageManager()) {
+                    requestAllFilesAccess()
+                } else {
+                    requestMediaAccessIfNeeded()
+                }
+            } else {
+                requestAllFilesAccess()
+            }
         }
 
         findViewById<Button>(R.id.btn_grant_location).setOnClickListener {
@@ -66,11 +74,23 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun requestMediaAccessIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val perms = arrayOf(
-                Manifest.permission.READ_MEDIA_IMAGES,
-                Manifest.permission.READ_MEDIA_VIDEO
-            )
-            ActivityCompat.requestPermissions(this, perms, 103)
+            val missing = mutableListOf<String>()
+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                missing += Manifest.permission.READ_MEDIA_IMAGES
+            }
+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                missing += Manifest.permission.READ_MEDIA_VIDEO
+            }
+
+            if (missing.isNotEmpty()) {
+                ActivityCompat.requestPermissions(this, missing.toTypedArray(), 103)
+            }
         }
     }
 

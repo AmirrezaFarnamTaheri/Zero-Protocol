@@ -38,7 +38,7 @@ class GalleryManager(private val context: Context) {
                         )
                     )
                 }
-                }
+            }
 
             // 2. Query Videos
             context.contentResolver.query(
@@ -55,19 +55,29 @@ class GalleryManager(private val context: Context) {
                         )
                     )
                 }
-                }
+            }
         } catch (_: SecurityException) {
             return@withContext null
-            }
+        }
 
             if (uris.isEmpty()) return@withContext null
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // The underlying Binder transaction buffer has a limited size (typically 1MB).
-            // A very large list of Uris can cause a TransactionTooLargeException.
-            // We cap the deletion request at a large but safe number of items.
-            val batch = uris.take(10000)
-            MediaStore.createDeleteRequest(context.contentResolver, batch).intentSender
+                // The underlying Binder transaction buffer has a limited size (typically 1MB).
+                // A very large list of Uris can cause a TransactionTooLargeException.
+                // Build the request with an adaptive batch size to avoid hard failures.
+                var batchSize = uris.size.coerceAtMost(10_000)
+                while (batchSize > 0) {
+                    val batch = uris.take(batchSize)
+                    try {
+                        return@withContext MediaStore
+                            .createDeleteRequest(context.contentResolver, batch)
+                            .intentSender
+                    } catch (_: android.os.TransactionTooLargeException) {
+                        batchSize /= 2
+                    }
+                }
+                return@withContext null
             } else {
                 for (uri in uris) {
                     try {

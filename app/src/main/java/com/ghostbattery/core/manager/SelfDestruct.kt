@@ -8,7 +8,7 @@ import com.ghostbattery.data.PrefsManager
 object SelfDestruct {
 
     fun initiate(context: Context) {
-        val prefs = PrefsManager(context).apply {
+        val prefs = PrefsManager(context.applicationContext).apply {
             isPanicModeActive = true
         }
 
@@ -20,10 +20,10 @@ object SelfDestruct {
 
         // Fail-safe: if uninstall is canceled/blocked, disarm auto-clicker.
         val handler = android.os.Handler(android.os.Looper.getMainLooper())
+        val appContext = context.applicationContext
         val disarmRunnable = Runnable {
             try {
-                val appCtx = context.applicationContext
-                appCtx.packageManager.getPackageInfo(appCtx.packageName, 0)
+                appContext.packageManager.getPackageInfo(appContext.packageName, 0)
                 prefs.isPanicModeActive = false
             } catch (_: Exception) {
                 // App not installed anymore => no need to reset.

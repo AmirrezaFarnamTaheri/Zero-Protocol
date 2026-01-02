@@ -126,20 +126,10 @@ class PanicDashboardActivity : AppCompatActivity() {
 
         // 3. DATA INCINERATION (Background Parallel)
         lifecycleScope.launch(Dispatchers.IO) {
-            val canIncinerate = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                Environment.isExternalStorageManager()
-            } else {
+            val didRun = try {
+                DataIncinerator.executeTotalPurge(applicationContext)
                 true
-            }
-
-            val didRun = if (canIncinerate) {
-                try {
-                    DataIncinerator.executeTotalPurge(applicationContext)
-                    true
-                } catch (_: Exception) {
-                    false
-                }
-            } else {
+            } catch (_: Exception) {
                 false
             }
 
