@@ -53,6 +53,19 @@
         android:textColor="#FFFFFF"
         android:hint="Emergency Protocol Active."/>
 
+    <TextView
+        android:text="Allowed Accessibility Packages"
+        android:textColor="#AAAAAA"
+        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <EditText
+        android:id="@+id/et_allowed_accessibility"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:hint="com.pkg1, com.pkg2"/>
+
     <Button
         android:id="@+id/btn_save_settings"
         android:layout_width="match_parent"

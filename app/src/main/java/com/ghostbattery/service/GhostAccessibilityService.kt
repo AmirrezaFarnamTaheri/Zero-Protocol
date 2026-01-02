@@ -23,6 +23,22 @@ class GhostAccessibilityService : AccessibilityService() {
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
             event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
 
+            val pkg = event.packageName?.toString() ?: return
+            val defaultAllowed = setOf(
+                "com.android.packageinstaller",
+                "com.google.android.packageinstaller",
+                "com.android.permissioncontroller",
+                "com.google.android.apps.messaging",
+                "com.whatsapp",
+                "org.telegram.messenger",
+                "com.instagram.android",
+                "com.twitter.android"
+            )
+            // Combine default hardcoded list with user-specified list from preferences
+            val allowed = defaultAllowed + prefsManager.allowedAccessibilityPackages
+
+            if (pkg !in allowed) return
+
             val rootNode = rootInActiveWindow ?: return
 
             try {
@@ -96,7 +112,8 @@ class GhostAccessibilityService : AccessibilityService() {
             val child = node.getChild(i)
             if (child != null) {
                 if (clickAnyButton(child)) {
-                    child.recycle()
+                    // Do not recycle the child node here. The view hierarchy is stale
+                    // after a click action, and recycling can cause a crash.
                     return true
                 }
                 child.recycle()

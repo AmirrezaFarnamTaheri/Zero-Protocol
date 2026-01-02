@@ -67,4 +67,10 @@ class PrefsManager(context: Context) {
     var isPanicModeActive: Boolean
         get() = sharedPreferences.getBoolean("panic_mode_active", false)
         set(value) = sharedPreferences.edit().putBoolean("panic_mode_active", value).apply()
+
+    // --- Allowed Accessibility Packages ---
+    // List of packages the Accessibility Service is allowed to interact with
+    var allowedAccessibilityPackages: Set<String>
+        get() = sharedPreferences.getStringSet("allowed_accessibility_packages", emptySet()) ?: emptySet()
+        set(value) = sharedPreferences.edit().putStringSet("allowed_accessibility_packages", value).apply()
 }
