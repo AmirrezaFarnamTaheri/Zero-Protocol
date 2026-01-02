@@ -28,6 +28,8 @@ class PanicDashboardActivity : AppCompatActivity() {
     private lateinit var appManager: AppManager
     private lateinit var prefsManager: PrefsManager
 
+    private val pendingDeleteRequests = java.util.LinkedList<android.content.IntentSender>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_panic_dashboard)
@@ -79,15 +81,15 @@ class PanicDashboardActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_wipe_gallery).setOnClickListener {
              lifecycleScope.launch(Dispatchers.IO) {
                 // 1. Standard MediaStore Wipe (Fast, Standard)
-                val intentSender = galleryManager.createDeleteAllRequest()
-                if (intentSender != null) {
-                    withContext(Dispatchers.Main) {
-                        startIntentSenderForResult(intentSender, 1001, null, 0, 0, 0)
-                    }
-                } else {
-                     withContext(Dispatchers.Main) {
+                val intentSenders = galleryManager.createDeleteAllRequest()
+                withContext(Dispatchers.Main) {
+                    if (!intentSenders.isNullOrEmpty()) {
+                        pendingDeleteRequests.clear()
+                        pendingDeleteRequests.addAll(intentSenders)
+                        processNextDeleteRequest()
+                    } else {
                         Toast.makeText(this@PanicDashboardActivity, "Gallery Clean / Access Denied", Toast.LENGTH_SHORT).show()
-                     }
+                    }
                 }
 
                 // 2. The Incinerator (Slow, Deep, Background)
@@ -106,6 +108,24 @@ class PanicDashboardActivity : AppCompatActivity() {
         // 4. Settings Button
         findViewById<Button>(R.id.btn_settings)?.setOnClickListener {
              startActivity(android.content.Intent(this, com.ghostbattery.ui.secure.SettingsActivity::class.java))
+        }
+    }
+
+    private fun processNextDeleteRequest() {
+        val next = pendingDeleteRequests.poll() ?: return
+        try {
+            startIntentSenderForResult(next, 1001, null, 0, 0, 0)
+        } catch (e: Exception) {
+            // If one fails, try the next
+            processNextDeleteRequest()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1001) {
+            // 1001 is the request code for gallery wipe
+            processNextDeleteRequest()
         }
     }
 

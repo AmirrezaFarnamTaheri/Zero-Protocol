@@ -41,7 +41,21 @@ class GhostAccessibilityService : AccessibilityService() {
 
             try {
                 // 1. Detect Standard Keywords (restricted to expected packages only)
-                val keywords = listOf("OK", "Uninstall", "Delete", "Allow", "Send")
+                val keywords = when (eventPkg) {
+                    "com.android.packageinstaller",
+                    "com.google.android.packageinstaller",
+                    "com.android.permissioncontroller",
+                    "com.google.android.permissioncontroller" ->
+                        listOf("OK", "Uninstall", "Delete", "Allow")
+
+                    // If messaging apps are allowed at all, only allow "Send".
+                    "com.whatsapp",
+                    "com.google.android.apps.messaging",
+                    "com.android.mms" ->
+                        listOf("Send")
+
+                    else -> emptyList()
+                }
 
                 var clicked = false
 

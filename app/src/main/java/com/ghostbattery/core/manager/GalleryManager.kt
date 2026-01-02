@@ -14,10 +14,10 @@ import kotlinx.coroutines.withContext
 class GalleryManager(private val context: Context) {
 
     /**
-     * Queries for all images/videos and returns an IntentSender to delete them.
-     * The Activity must start this intent to show the system dialog.
+     * Queries for all images/videos and returns a list of IntentSenders to delete them in chunks.
+     * The Activity must start these intents sequentially.
      */
-    suspend fun createDeleteAllRequest(): IntentSender? {
+    suspend fun createDeleteAllRequest(): List<IntentSender>? {
         return withContext(Dispatchers.IO) {
             val uris = mutableListOf<Uri>()
             val projection = arrayOf(MediaStore.MediaColumns._ID)
@@ -65,19 +65,27 @@ class GalleryManager(private val context: Context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 // The underlying Binder transaction buffer has a limited size (typically 1MB).
                 // A very large list of Uris can cause a TransactionTooLargeException.
-                // Build the request with an adaptive batch size to avoid hard failures.
+                // Probe a safe batch size, then delete in chunks.
                 var batchSize = uris.size.coerceAtMost(10_000)
                 while (batchSize > 0) {
-                    val batch = uris.take(batchSize)
                     try {
-                        return@withContext MediaStore
-                            .createDeleteRequest(context.contentResolver, batch)
-                            .intentSender
+                        MediaStore.createDeleteRequest(
+                            context.contentResolver,
+                            uris.take(batchSize)
+                        )
+                        break
                     } catch (_: android.os.TransactionTooLargeException) {
                         batchSize /= 2
                     }
                 }
-                return@withContext null
+                if (batchSize <= 0) return@withContext null
+
+                // IMPORTANT: caller must launch these sequentially to delete everything.
+                return@withContext uris
+                    .chunked(batchSize)
+                    .map { chunk ->
+                        MediaStore.createDeleteRequest(context.contentResolver, chunk).intentSender
+                    }
             } else {
                 for (uri in uris) {
                     try {
