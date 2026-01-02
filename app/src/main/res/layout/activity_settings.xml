@@ -112,4 +112,13 @@
         android:backgroundTint="#673AB7"
         android:layout_marginTop="8dp"/>
 
+    <Button
+        android:id="@+id/btn_samsung_lockdown"
+        android:text="SETUP SAMSUNG LOCKDOWN"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#2196F3"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"/>
+
 </LinearLayout>

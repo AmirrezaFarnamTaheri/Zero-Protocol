@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.ghostbattery.R
 import com.ghostbattery.data.PrefsManager
 import com.ghostbattery.ui.help.HelpActivity
+import com.ghostbattery.utils.SamsungUtils
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -53,6 +54,14 @@ class SettingsActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btn_diagnostics).setOnClickListener {
             startActivity(Intent(this, DiagnosticsActivity::class.java))
+        }
+
+        if (SamsungUtils.isSamsungDevice()) {
+            val btnSamsung = findViewById<Button>(R.id.btn_samsung_lockdown)
+            btnSamsung.visibility = android.view.View.VISIBLE
+            btnSamsung.setOnClickListener {
+                SamsungUtils.openLockdownSettings(this)
+            }
         }
     }
 
