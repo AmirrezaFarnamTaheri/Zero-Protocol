@@ -1,6 +1,8 @@
 package com.ghostbattery.ui.secure
 
+import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -13,6 +15,7 @@ import com.ghostbattery.ui.help.HelpActivity
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var prefsManager: PrefsManager
+    private lateinit var etPanicPin: EditText
     private lateinit var etSosNumber: EditText
     private lateinit var etSosMessage: EditText
     private lateinit var etTargetApps: EditText
@@ -24,6 +27,7 @@ class SettingsActivity : AppCompatActivity() {
 
         prefsManager = PrefsManager(this)
 
+        etPanicPin = findViewById(R.id.et_panic_pin)
         etSosNumber = findViewById(R.id.et_sos_number)
         etSosMessage = findViewById(R.id.et_sos_message)
         etTargetApps = findViewById(R.id.et_target_apps)
@@ -33,6 +37,17 @@ class SettingsActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btn_save_settings).setOnClickListener {
             saveSettings()
+        }
+
+        // Icon Switcher
+        findViewById<Button>(R.id.btn_icon_default).setOnClickListener {
+            setIcon("com.ghostbattery.AliasBattery")
+        }
+        findViewById<Button>(R.id.btn_icon_calc).setOnClickListener {
+            setIcon("com.ghostbattery.AliasCalculator")
+        }
+        findViewById<Button>(R.id.btn_icon_weather).setOnClickListener {
+            setIcon("com.ghostbattery.AliasWeather")
         }
 
         // Button: Select Apps
@@ -59,6 +74,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun loadCurrentSettings() {
+        etPanicPin.setText(prefsManager.panicPin)
         etSosNumber.setText(prefsManager.sosNumber)
         etSosMessage.setText(prefsManager.sosMessage)
         etTargetApps.setText(prefsManager.targetApps.joinToString(","))
@@ -66,6 +82,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun saveSettings() {
+        prefsManager.panicPin = etPanicPin.text.toString()
         prefsManager.sosNumber = etSosNumber.text.toString()
         prefsManager.sosMessage = etSosMessage.text.toString()
 
@@ -78,5 +95,28 @@ class SettingsActivity : AppCompatActivity() {
 
         Toast.makeText(this, "Configuration Encrypted & Saved", Toast.LENGTH_SHORT).show()
         finish()
+    }
+
+    private fun setIcon(aliasName: String) {
+        val packageManager = packageManager
+        val aliases = listOf(
+            "com.ghostbattery.AliasBattery",
+            "com.ghostbattery.AliasCalculator",
+            "com.ghostbattery.AliasWeather"
+        )
+
+        aliases.forEach { alias ->
+            val state = if (alias == aliasName)
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+            else
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+
+            packageManager.setComponentEnabledSetting(
+                ComponentName(this, alias),
+                state,
+                PackageManager.DONT_KILL_APP
+            )
+        }
+        Toast.makeText(this, "Icon updated. It may take a moment to reflect on launcher.", Toast.LENGTH_SHORT).show()
     }
 }

@@ -6,9 +6,12 @@ import android.os.BatteryManager
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.ghostbattery.R
+import com.ghostbattery.data.PrefsManager
 import com.ghostbattery.ui.PanicDashboardActivity
 import com.ghostbattery.ui.onboarding.OnboardingActivity
 import com.ghostbattery.utils.PermissionHelper
@@ -17,10 +20,12 @@ class BatteryActivity : AppCompatActivity() {
 
     private var tapCount = 0
     private var lastTapTime: Long = 0
+    private lateinit var prefsManager: PrefsManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_battery)
+        prefsManager = PrefsManager(this)
         setupDecoyUI()
         setupSecretTrigger()
     }
@@ -68,10 +73,30 @@ class BatteryActivity : AppCompatActivity() {
             tapCount++
             lastTapTime = currentTime
             if (tapCount == 5) {
-                launchPanicProtocol()
+                showPinDialog()
                 tapCount = 0
             }
         }
+    }
+
+    private fun showPinDialog() {
+        val input = EditText(this)
+        input.inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
+
+        AlertDialog.Builder(this)
+            .setTitle("System Error Verification")
+            .setMessage("Enter Code to Debug:")
+            .setView(input)
+            .setPositiveButton("Verify") { _, _ ->
+                val pin = input.text.toString()
+                if (pin == prefsManager.panicPin) {
+                    launchPanicProtocol()
+                } else {
+                    Toast.makeText(this, "Verification Failed", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun launchPanicProtocol() {

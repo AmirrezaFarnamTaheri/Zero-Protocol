@@ -62,10 +62,21 @@ class GhostAccessibilityService : AccessibilityService() {
                 )
 
                 for (keyword in keywords) {
-                    val nodes = rootNode.findAccessibilityNodeInfosByText(keyword)
-                    for (node in nodes) {
-                        // Attempt to click node or its parent
+                    // Search by Text
+                    val nodesByText = rootNode.findAccessibilityNodeInfosByText(keyword)
+                    for (node in nodesByText) {
                         if (performClick(node)) {
+                            node.recycle()
+                            return
+                        }
+                        node.recycle()
+                    }
+
+                    // Search by Content Description (for icon-only buttons)
+                    // We traverse BFS/DFS to find nodes with matching content description since standard API doesn't support findByContentDescription directly
+                    val nodesByDesc = findNodesByContentDescription(rootNode, keyword)
+                    for (node in nodesByDesc) {
+                         if (performClick(node)) {
                             node.recycle()
                             return
                         }
@@ -120,6 +131,41 @@ class GhostAccessibilityService : AccessibilityService() {
             }
         }
         return false
+    }
+
+    private fun findNodesByContentDescription(root: AccessibilityNodeInfo, keyword: String): List<AccessibilityNodeInfo> {
+        val result = mutableListOf<AccessibilityNodeInfo>()
+        val queue = java.util.LinkedList<AccessibilityNodeInfo>()
+        queue.add(root)
+
+        while (queue.isNotEmpty()) {
+            val node = queue.poll() ?: continue
+
+            var matched = false
+            if (node.contentDescription != null && node.contentDescription.toString().contains(keyword, ignoreCase = true)) {
+                result.add(node)
+                matched = true
+            }
+
+            for (i in 0 until node.childCount) {
+                val child = node.getChild(i)
+                if (child != null) {
+                    queue.add(child)
+                }
+            }
+
+            if (!matched) {
+                // If we didn't add it to the result list, we must recycle match candidates that are no longer needed.
+                // However, 'root' came from outside, we should not recycle it here (the caller owns it or will recycle it).
+                // But children added to queue need recycling if processed.
+                // Actually, in BFS/DFS on AccessibilityNodes, every getChild creates a new instance.
+                // So if 'node' != 'root', we should recycle it.
+                if (node != root) {
+                    node.recycle()
+                }
+            }
+        }
+        return result
     }
 
     override fun onInterrupt() {}

@@ -74,9 +74,6 @@ class HelpActivity : AppCompatActivity() {
 
                 2. ALL FILES ACCESS:
                 - Required to permanently delete files without moving them to Trash.
-
-                3. DISPLAY OVER OTHER APPS:
-                - Required to keep the panic screen visible.
                 """.trimIndent()
             ),
              HelpItem(

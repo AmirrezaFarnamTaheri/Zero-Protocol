@@ -10,13 +10,72 @@
         android:text="Secure Configuration"
         android:textColor="#FFFFFF"
         android:textSize="24sp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="16dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
     <TextView
+        android:text="Launcher Icon Camouflage"
+        android:textColor="#4CAF50"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="3"
+        android:layout_marginBottom="24dp">
+
+        <Button
+            android:id="@+id/btn_icon_default"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Default"
+            android:textSize="12sp"
+            android:backgroundTint="#555555"
+            android:layout_marginEnd="4dp"/>
+
+        <Button
+            android:id="@+id/btn_icon_calc"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Calc"
+            android:textSize="12sp"
+            android:backgroundTint="#555555"
+            android:layout_marginEnd="4dp"/>
+
+        <Button
+            android:id="@+id/btn_icon_weather"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Weather"
+            android:textSize="12sp"
+            android:backgroundTint="#555555"/>
+    </LinearLayout>
+
+    <TextView
+        android:text="Panic PIN (Optional)"
+        android:textColor="#AAAAAA"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <EditText
+        android:id="@+id/et_panic_pin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:inputType="numberPassword"
+        android:hint="5555"/>
+
+    <TextView
         android:text="SOS Contact Number"
         android:textColor="#AAAAAA"
+        android:layout_marginTop="16dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
     <EditText
