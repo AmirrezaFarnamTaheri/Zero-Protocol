@@ -25,7 +25,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        prefsManager = PrefsManager(this)
+        prefsManager = PrefsManager.getInstance(this)
 
         etPanicPin = findViewById(R.id.et_panic_pin)
         etSosNumber = findViewById(R.id.et_sos_number)

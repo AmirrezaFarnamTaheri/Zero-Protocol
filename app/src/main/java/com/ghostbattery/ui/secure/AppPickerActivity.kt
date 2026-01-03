@@ -24,7 +24,7 @@ class AppPickerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app_picker)
 
-        prefsManager = PrefsManager(this)
+        prefsManager = PrefsManager.getInstance(this)
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_app_list)
         recyclerView.layoutManager = LinearLayoutManager(this)

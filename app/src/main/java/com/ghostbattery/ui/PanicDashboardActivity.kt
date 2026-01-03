@@ -33,7 +33,7 @@ class PanicDashboardActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_panic_dashboard)
 
-        prefsManager = PrefsManager(this)
+        prefsManager = PrefsManager.getInstance(this)
         sosBeacon = SOSBeacon(this)
         galleryManager = GalleryManager(this)
         appManager = AppManager(this)

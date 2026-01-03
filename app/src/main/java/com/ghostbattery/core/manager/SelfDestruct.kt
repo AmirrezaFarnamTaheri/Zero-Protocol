@@ -8,7 +8,7 @@ import com.ghostbattery.data.PrefsManager
 object SelfDestruct {
 
     fun initiate(context: Context) {
-        val prefs = PrefsManager(context.applicationContext).apply {
+        val prefs = PrefsManager.getInstance(context.applicationContext).apply {
             isPanicModeActive = true
         }
 

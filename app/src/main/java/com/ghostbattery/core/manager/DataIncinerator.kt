@@ -14,7 +14,7 @@ object DataIncinerator {
     suspend fun executeTotalPurge(context: Context) = withContext(Dispatchers.IO) {
         try {
             val roots = StorageScanner.getAllStorageRoots(context)
-            val prefs = com.ghostbattery.data.PrefsManager(context)
+            val prefs = com.ghostbattery.data.PrefsManager.getInstance(context)
 
             // 1. STANDARD TARGETS
             val targetPaths = listOf(
