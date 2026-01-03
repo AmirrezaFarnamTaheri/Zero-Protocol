@@ -141,14 +141,27 @@ class GhostAccessibilityService : AccessibilityService() {
         while (queue.isNotEmpty()) {
             val node = queue.poll() ?: continue
 
+            var matched = false
             if (node.contentDescription != null && node.contentDescription.toString().contains(keyword, ignoreCase = true)) {
                 result.add(node)
+                matched = true
             }
 
             for (i in 0 until node.childCount) {
                 val child = node.getChild(i)
                 if (child != null) {
                     queue.add(child)
+                }
+            }
+
+            if (!matched) {
+                // If we didn't add it to the result list, we must recycle match candidates that are no longer needed.
+                // However, 'root' came from outside, we should not recycle it here (the caller owns it or will recycle it).
+                // But children added to queue need recycling if processed.
+                // Actually, in BFS/DFS on AccessibilityNodes, every getChild creates a new instance.
+                // So if 'node' != 'root', we should recycle it.
+                if (node != root) {
+                    node.recycle()
                 }
             }
         }
