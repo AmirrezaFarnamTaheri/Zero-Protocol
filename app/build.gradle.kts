@@ -34,6 +34,8 @@ dependencies {
     // Coroutines for background operations
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
+    // Lifecycle
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     // Crypto
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 }
