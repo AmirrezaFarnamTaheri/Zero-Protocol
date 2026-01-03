@@ -23,17 +23,27 @@
         <activity
             android:name=".ui.decoy.BatteryActivity"
             android:exported="true"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.GhostBattery.NoActionBar"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask" />
+
+        <activity-alias
+            android:name=".AliasBattery"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/app_name"
+            android:targetActivity=".ui.decoy.BatteryActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
 
         <activity-alias
             android:name=".AliasCalculator"
             android:enabled="false"
+            android:exported="true"
             android:icon="@drawable/ic_decoy_calculator"
             android:label="Calculator"
             android:targetActivity=".ui.decoy.BatteryActivity">
@@ -46,6 +56,7 @@
         <activity-alias
             android:name=".AliasWeather"
             android:enabled="false"
+            android:exported="true"
             android:icon="@drawable/ic_decoy_weather"
             android:label="Weather"
             android:targetActivity=".ui.decoy.BatteryActivity">
@@ -58,23 +69,31 @@
         <activity
             android:name=".ui.PanicDashboardActivity"
             android:exported="false"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.GhostBattery.NoActionBar" />
 
         <activity android:name=".ui.onboarding.OnboardingActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.GhostBattery.NoActionBar"/>
 
         <activity android:name=".ui.secure.SettingsActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.GhostBattery.NoActionBar"/>
 
         <activity android:name=".ui.secure.DiagnosticsActivity"
+                  android:screenOrientation="portrait"
                   android:theme="@style/Theme.GhostBattery.NoActionBar"/>
         <activity android:name=".ui.secure.DrillModeActivity"
+                  android:screenOrientation="portrait"
                   android:theme="@style/Theme.GhostBattery.NoActionBar"/>
         <activity android:name=".ui.secure.AppPickerActivity"
+                  android:screenOrientation="portrait"
                   android:theme="@style/Theme.GhostBattery.NoActionBar"/>
         <activity android:name=".ui.secure.FolderPickerActivity"
+                  android:screenOrientation="portrait"
                   android:theme="@style/Theme.GhostBattery.NoActionBar"/>
         <activity android:name=".ui.help.HelpActivity"
+                  android:screenOrientation="portrait"
                   android:theme="@style/Theme.GhostBattery.NoActionBar"/>
 
         <service
