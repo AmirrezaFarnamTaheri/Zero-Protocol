@@ -11,7 +11,7 @@ class GhostAccessibilityService : AccessibilityService() {
     private lateinit var prefsManager: PrefsManager
 
     override fun onServiceConnected() {
-        prefsManager = PrefsManager(this)
+        prefsManager = PrefsManager.getInstance(this)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {

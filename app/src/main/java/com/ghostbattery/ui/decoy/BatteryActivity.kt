@@ -25,7 +25,7 @@ class BatteryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_battery)
-        prefsManager = PrefsManager(this)
+        prefsManager = PrefsManager.getInstance(this)
         setupDecoyUI()
         setupSecretTrigger()
     }
@@ -103,6 +103,5 @@ class BatteryActivity : AppCompatActivity() {
         val intent = Intent(this, PanicDashboardActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
-        finish()
     }
 }

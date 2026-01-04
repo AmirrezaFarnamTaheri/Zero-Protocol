@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 
-class PrefsManager(context: Context) {
+class PrefsManager private constructor(context: Context) {
 
     private val sharedPreferences: SharedPreferences
 
@@ -21,6 +21,17 @@ class PrefsManager(context: Context) {
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
+    }
+
+    companion object {
+        @Volatile
+        private var INSTANCE: PrefsManager? = null
+
+        fun getInstance(context: Context): PrefsManager {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: PrefsManager(context.applicationContext).also { INSTANCE = it }
+            }
+        }
     }
 
     // --- SOS Configuration ---

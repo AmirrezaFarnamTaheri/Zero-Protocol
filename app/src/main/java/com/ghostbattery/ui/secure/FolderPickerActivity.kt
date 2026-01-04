@@ -26,7 +26,7 @@ class FolderPickerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_folder_picker)
 
-        prefsManager = PrefsManager(this)
+        prefsManager = PrefsManager.getInstance(this)
         currentDir = Environment.getExternalStorageDirectory() // Start at /sdcard
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_file_list)
