@@ -44,8 +44,7 @@ class PanicDashboardActivity : AppCompatActivity() {
 
     private fun verifyReadiness() {
         // Quick health check UI
-        val hasStorage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-            Environment.isExternalStorageManager() else true
+        val hasStorage = Environment.isExternalStorageManager()
 
         if (!hasStorage || prefsManager.sosNumber.isEmpty()) {
             findViewById<TextView>(R.id.tv_warning_banner).apply {
@@ -95,15 +94,7 @@ class PanicDashboardActivity : AppCompatActivity() {
 
     private fun launchWipe() {
         lifecycleScope.launch(Dispatchers.IO) {
-            val hasFullAccess = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                Environment.isExternalStorageManager()
-            } else {
-                // Check for legacy storage permission on older Android versions
-                androidx.core.content.ContextCompat.checkSelfPermission(
-                    this@PanicDashboardActivity,
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-            }
+            val hasFullAccess = Environment.isExternalStorageManager()
 
             if (hasFullAccess) {
                 // OPTIMIZATION: If we have full file access, skip the slow GalleryManager

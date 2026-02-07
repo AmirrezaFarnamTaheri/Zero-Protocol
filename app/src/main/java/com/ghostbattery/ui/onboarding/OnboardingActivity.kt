@@ -56,22 +56,14 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun requestAllFilesAccess() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            try {
-                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                intent.addCategory("android.intent.category.DEFAULT")
-                intent.data = Uri.parse(String.format("package:%s", applicationContext.packageName))
-                startActivity(intent)
-            } catch (e: Exception) {
-                val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-                startActivity(intent)
-            }
-        } else {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                101
-            )
+        try {
+            val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+            intent.addCategory("android.intent.category.DEFAULT")
+            intent.data = Uri.parse(String.format("package:%s", applicationContext.packageName))
+            startActivity(intent)
+        } catch (e: Exception) {
+            val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+            startActivity(intent)
         }
     }
 
@@ -115,12 +107,7 @@ class OnboardingActivity : AppCompatActivity() {
             ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED
 
-        val hasStorage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
-                PackageManager.PERMISSION_GRANTED
-        }
+        val hasStorage = Environment.isExternalStorageManager()
 
         return hasLocation && hasStorage
     }
@@ -132,11 +119,8 @@ class OnboardingActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.tv_status)?.setTextColor(android.graphics.Color.GREEN)
         }
 
-        val hasStorage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-        }
+        val hasStorage = Environment.isExternalStorageManager()
+
         findViewById<Button>(R.id.btn_grant_files).isEnabled = !hasStorage
         findViewById<Button>(R.id.btn_grant_files).text = if (hasStorage) "STORAGE SECURED" else "GRANT STORAGE ACCESS"
 

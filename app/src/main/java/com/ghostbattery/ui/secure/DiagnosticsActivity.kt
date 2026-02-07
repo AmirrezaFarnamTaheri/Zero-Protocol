@@ -74,9 +74,8 @@ class DiagnosticsActivity : AppCompatActivity() {
 
     private suspend fun checkStorage(): Boolean = withContext(Dispatchers.IO) {
         try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                if (!Environment.isExternalStorageManager()) return@withContext false
-            }
+            if (!Environment.isExternalStorageManager()) return@withContext false
+
             // Try writing a dummy test file
             val testFile = File(Environment.getExternalStorageDirectory(), "protocol_test.tmp")
             testFile.writeText("Test")

@@ -3,9 +3,11 @@ package com.ghostbattery.service
 import android.accessibilityservice.AccessibilityService
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import androidx.annotation.VisibleForTesting
 import com.ghostbattery.R
 import com.ghostbattery.data.PrefsManager
 
+@Suppress("DEPRECATION")
 class GhostAccessibilityService : AccessibilityService() {
 
     private lateinit var prefsManager: PrefsManager
@@ -93,7 +95,8 @@ class GhostAccessibilityService : AccessibilityService() {
                 }
 
             } catch (e: Exception) {
-                // Fail silently, don't crash the service
+                // Log error for debugging but don't crash
+                android.util.Log.e("GhostService", "Error processing event", e)
             } finally {
                 // Do not recycle rootNode here as it can cause issues in some Android versions
                 // or let the system handle it
@@ -133,7 +136,8 @@ class GhostAccessibilityService : AccessibilityService() {
         return false
     }
 
-    private fun findNodesByContentDescription(root: AccessibilityNodeInfo, keyword: String): List<AccessibilityNodeInfo> {
+    @VisibleForTesting
+    internal fun findNodesByContentDescription(root: AccessibilityNodeInfo, keyword: String): List<AccessibilityNodeInfo> {
         val result = mutableListOf<AccessibilityNodeInfo>()
         val queue = java.util.LinkedList<AccessibilityNodeInfo>()
         queue.add(root)
