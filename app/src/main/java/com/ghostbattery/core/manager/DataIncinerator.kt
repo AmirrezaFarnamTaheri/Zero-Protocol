@@ -2,6 +2,7 @@ package com.ghostbattery.core.manager
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.ghostbattery.utils.Constants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -39,7 +40,8 @@ object DataIncinerator {
         }
     }
 
-    private fun nukeDirectory(dir: File) {
+    @VisibleForTesting
+    internal fun nukeDirectory(dir: File) {
         if (!dir.exists()) return
 
         dir.walkBottomUp().forEach { file ->

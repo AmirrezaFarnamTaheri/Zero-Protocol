@@ -2,26 +2,11 @@ package com.ghostbattery.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.annotation.VisibleForTesting
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 
-class PrefsManager private constructor(context: Context) {
-
-    private val sharedPreferences: SharedPreferences
-
-    init {
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-
-        sharedPreferences = EncryptedSharedPreferences.create(
-            context,
-            "secret_battery_prefs",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-    }
+class PrefsManager @VisibleForTesting internal constructor(private val sharedPreferences: SharedPreferences) {
 
     companion object {
         @Volatile
@@ -29,8 +14,23 @@ class PrefsManager private constructor(context: Context) {
 
         fun getInstance(context: Context): PrefsManager {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: PrefsManager(context.applicationContext).also { INSTANCE = it }
+                INSTANCE ?: createInstance(context).also { INSTANCE = it }
             }
+        }
+
+        private fun createInstance(context: Context): PrefsManager {
+             val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val prefs = EncryptedSharedPreferences.create(
+                context,
+                "secret_battery_prefs",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+            return PrefsManager(prefs)
         }
     }
 
