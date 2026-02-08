@@ -1,5 +1,4 @@
-# Protocol Zero: System Battery Health
-### Internal Code: GhostBattery
+# Protocol Zero: System Battery Health (GhostBattery)
 
 **System Battery Health** is a sophisticated Android security application disguised as a generic battery utility. Its primary purpose is to provide a "panic button" capability for users in high-risk environments (e.g., journalists, activists, or individuals in hostile territories) who need to rapidly secure their device data and uninstall sensitive applications.
 
@@ -61,7 +60,7 @@ Once triggered, the app exposes the **Panic Dashboard**, which orchestrates thre
 *   **Physical Device** (Emulators may fail GPS/Camera tests).
 
 ### Installation
-1.  **Build:** Clone the repo and build the APK using Android Studio or the provided GitHub Action.
+1.  **Build:** Clone the repo and build the APK using Android Studio.
 2.  **Install:** Sideload the `app-debug.apk` onto your device.
 3.  **Hide:** (Optional) Use your launcher's "Hide App" feature to further conceal "System Battery Health".
 
@@ -109,13 +108,10 @@ Instead, use **Drill Mode** (accessible via Settings):
 
 ---
 
-## ⚠️ Operational Security (OPSEC) Tips
+## 🧪 Testing
 
-1.  **Notifications:** Go to *Android Settings -> Apps -> System Battery Health -> Notifications* and turn them **OFF**. You do not want a "Permission Granted" or "Service Running" notification to give you away.
-2.  **Battery Optimization:** Set the app to **Unrestricted** battery usage so the OS doesn't kill the background Incinerator process.
-3.  **Secure Folder:** For Samsung users, move this app (and your sensitive apps) into the **Secure Folder**. This adds a layer of encryption and makes the "Decoy" effectively double-blind.
-
----
-
-## 📄 License
-MIT License. See `LICENSE` file for details.
+This project uses extensive unit testing with Robolectric and Mockito to ensure reliability without risking real data loss during development.
+To run tests:
+```bash
+./gradlew testDebugUnitTest
+```
